@@ -29,6 +29,8 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --viewport-width: 100vw;
+    --scale-value: calc(var(--viewport-width) * 0.9);
   }
 
   .dark {
@@ -66,9 +68,4 @@
   body {
     @apply bg-background text-foreground;
   }
-}
-
-main {
-  display: grid;
-  grid-template-rows: max-content auto;
 }

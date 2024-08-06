@@ -81,7 +81,7 @@ export default function Login() {
         <div className="absolute top-5 right-5 hidden sm:block">
           <ModeToggle />
         </div>
-        <Card className="w-80 border-0 sm:border">
+        <Card className="w-[90%] sm:w-80 border-0 sm:border scale-100 xl:scale-105 2xl:scale-125">
           <CardHeader className="w-full">
             <CardTitle className="text-[26px] font-bold">Memorious</CardTitle>
             <CardDescription className="font-semibold text-[14px]">
