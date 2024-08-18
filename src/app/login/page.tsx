@@ -1,15 +1,14 @@
 'use client';
-// import Navbar from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/ui/themetoggle';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import GoogleIcon from '@/components/icons/google';
 import { EyeOpenIcon, EyeNoneIcon } from '@radix-ui/react-icons';
 import { googleLogin } from '@/actions/googleLogin';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -55,8 +54,7 @@ export default function Login() {
           duration: 2000,
           id: toastId,
         });
-
-        router.replace('/dashboard');
+        window.location.href = '/dashboard';
         return data;
       } else {
         toast.error('Invalid email or password', {
