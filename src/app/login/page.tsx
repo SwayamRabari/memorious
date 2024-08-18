@@ -56,7 +56,7 @@ export default function Login() {
           id: toastId,
         });
 
-        router.push('/dashboard');
+        router.push('/');
         return data;
       } else {
         toast.error('Invalid email or password', {
