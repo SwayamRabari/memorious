@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
+import nodemailer from 'nodemailer';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
@@ -25,17 +25,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    // 6 digit otp in string format
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // expires in 10 minutes
+    const expires = new Date(Date.now() + 10 * 60 * 1000);
 
-    const newUser = await prisma.user.create({
+    const existingOtp = await prisma.otp.findFirst({
+      where: { email: data.email },
+    });
+
+    // if existing otp, delete it and create a new one
+    if (existingOtp) {
+      await prisma.otp.delete({ where: { id: existingOtp.id } });
+    }
+
+    await prisma.otp.create({
       data: {
-        name: `${data.firstName.trim()} ${data.lastName.trim()}`,
         email: data.email,
-        password: hashedPassword,
-        provider: 'crdentials',
+        otp,
+        expiresAt: expires,
       },
     });
 
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    } as nodemailer.TransportOptions);
+
+    const mailOptions = {
+      from: '"Memorious" <memorious.so@gmail.com>',
+      to: data.email,
+      subject: 'Verify your email address',
+      text: `Your OTP is ${otp}`,
+    };
+
+    await transporter.sendMail(mailOptions);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error processing request:', error);

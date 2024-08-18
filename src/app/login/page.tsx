@@ -57,7 +57,6 @@ export default function Login() {
         });
 
         router.push('/dashboard');
-
         return data;
       } else {
         toast.error('Invalid email or password', {

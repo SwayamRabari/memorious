@@ -7,7 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
+model user {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String?  @unique
   name      String?
@@ -18,4 +18,13 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@index([provider])
+}
+
+model otp {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  otp       String
+  expiresAt DateTime
+
+  @@unique([email, otp])
 }
