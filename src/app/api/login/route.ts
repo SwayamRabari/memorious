@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     const user = await signIn('credentials', {
       email,
       password,
+      redirect: false,
     });
 
     return NextResponse.json(user);
