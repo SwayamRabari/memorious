@@ -14,7 +14,7 @@
     --primary-foreground: 0 0% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
+    --muted: 240 4.9% 83.9%;
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
@@ -68,4 +68,26 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+h1 {
+  @apply text-3xl font-bold;
+}
+h2 {
+  @apply text-2xl font-bold;
+}
+h3 {
+  @apply text-xl font-bold;
+}
+ul {
+  @apply list-disc list-inside;
+}
+p {
+  @apply text-primary font-medium;
+}
+pre {
+  @apply bg-secondary p-5 rounded-md;
+}
+code {
+  @apply text-primary font-mono bg-secondary p-1 rounded-md;
 }
