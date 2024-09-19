@@ -18,7 +18,7 @@ export default function Logo() {
           >
             <path
               d="M100 0H0V171L50 143L100 171V0Z"
-              className="fill-foreground"
+              className="fill-secondary-foreground"
             />
           </svg>
         </div>

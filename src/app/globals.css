@@ -12,7 +12,7 @@
     --popover-foreground: 240 10% 3.9%;
     --primary: 240 5.9% 10%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 92%;
+    --secondary: 240 4.8% 94%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.9% 83.9%;
     --muted-foreground: 240 3.8% 46.1%;
@@ -43,7 +43,7 @@
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
     --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary-foreground: 0 0% 90%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
     --accent: 240 3.7% 15.9%;
@@ -61,6 +61,11 @@
   }
 }
 
+main {
+  font-family: 'Inter', sans-serif;
+  @apply text-secondary-foreground;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -70,24 +75,89 @@
   }
 }
 
-h1 {
+.tiptap {
+  @apply text-secondary-foreground w-full;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.tiptap.p {
+  @apply text-[1rem];
+}
+.tiptap::-webkit-scrollbar {
+  display: none;
+}
+
+.tiptap h1 {
   @apply text-3xl font-bold;
 }
-h2 {
+
+.tiptap h2 {
   @apply text-2xl font-bold;
 }
-h3 {
+
+.tiptap h3 {
   @apply text-xl font-bold;
 }
-ul {
-  @apply list-disc list-inside;
+strong {
+  @apply font-bold;
 }
-p {
-  @apply text-primary font-medium;
+
+.tiptap ul,
+ol {
+  padding: 0 1rem;
+  margin-left: 0rem;
 }
+
+.tiptap li p {
+  margin: 0; /* Remove top and bottom margins for a consistent appearance */
+  padding: 0.25em 0; /* Add padding to create spacing around the text */
+}
+
 pre {
-  @apply bg-secondary p-5 rounded-md;
+  @apply bg-secondary text-secondary-foreground p-5 rounded-lg w-full text-nowrap overflow-x-auto h-fit flex-shrink-0;
 }
+
 code {
-  @apply text-primary font-mono bg-secondary p-1 rounded-md;
+  @apply bg-secondary text-secondary-foreground px-2 py-[2px] rounded-md overflow-x-auto whitespace-pre;
+}
+
+pre::-webkit-scrollbar {
+  @apply hidden;
+}
+
+pre code {
+  @apply bg-secondary text-secondary-foreground opacity-85 p-0 rounded-none overflow-x-auto whitespace-pre;
+}
+
+.tiptap {
+  @apply leading-relaxed;
+}
+
+/* styles.css */
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+.scrollarea::-webkit-scrollbar {
+  @apply bg-background w-[6px];
+}
+
+.scrollarea::-webkit-scrollbar-thumb {
+  @apply bg-secondary rounded-full;
+}
+
+.toolbarcontainer {
+  /* top shadow */
+  box-shadow: 0 -2px 2px 0 red;
 }
