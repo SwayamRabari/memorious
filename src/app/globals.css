@@ -76,7 +76,7 @@ main {
 }
 
 .tiptap {
-  @apply text-secondary-foreground w-full;
+  @apply text-secondary-foreground w-full caret-secondary-foreground;
 }
 
 .tiptap p.is-editor-empty:first-child::before {
@@ -155,9 +155,4 @@ pre code {
 
 .scrollarea::-webkit-scrollbar-thumb {
   @apply bg-secondary rounded-full;
-}
-
-.toolbarcontainer {
-  /* top shadow */
-  box-shadow: 0 -2px 2px 0 red;
 }
