@@ -3,7 +3,7 @@ export default function Logo() {
     <>
       <div className="logo text-[1.3rem] font-bold flex items-center gap-3 select-none">
         <div
-          className="h-10 bg-secondary w-10 rounded-md flex justify-center items-center
+          className="h-10 bg-secondary w-10 rounded-md hidden md:flex justify-center items-center
             "
         >
           <svg

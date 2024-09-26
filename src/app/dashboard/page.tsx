@@ -163,8 +163,8 @@ const Dashboard = () => {
         </div>
         <div className="scrollarea overflow-auto">
           <div
-            className={`editorsection h-full ${
-              isSidebarOpen ? 'px-24' : 'px-60'
+            className={`editorsection h-full px-5 sm:px-10 ${
+              isSidebarOpen ? 'lg:px-24' : 'lg:px-60'
             } py-14 flex flex-1 flex-col gap-6 transition-all duration-500`}
           >
             <div className="title w-full h-fit font-bold text-5xl leading-normal text-balance">
