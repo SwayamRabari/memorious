@@ -74,106 +74,130 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex h-screen w-screen transition-colors duration-150">
-      <div
-        className={`sidebar ${
-          isSidebarOpen ? 'w-[18rem]' : 'w-0 border-r-0'
-        } overflow-hidden flex-shrink-0 border-r flex flex-col transition-all duration-500 text-nowrap flex-nowrap`}
-      >
-        <div className="flex flex-col gap-5 p-5 border-b border-border">
-          <div>
-            <Button
-              variant="secondary"
-              className="justify-start w-full text-[1rem] px-3"
-              onClick={() => {
-                console.log(
-                  'Inner HTML:',
-                  document.querySelector('.ProseMirror')?.innerHTML
-                );
-              }}
-            >
-              <Plus className="h-5 w-5 mr-2 stroke-[2px] flex-shrink-0" />
-              New Note
-            </Button>
+    <div className="flex flex-col h-screen w-screen transition-colors duration-150">
+      <div className="header border-b border-border flex sm:hidden justify-between items-center w-full p-5">
+        <div className="flex gap-5">
+          <Button
+            variant={'secondary'}
+            className="h-10 w-10"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            {isSidebarOpen ? (
+              <PanelLeftClose className="h-5 w-5 flex-shrink-0" />
+            ) : (
+              <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
+            )}
+          </Button>
+        </div>
+        <ModeToggle />
+      </div>
+      <div className="flex flex-1 overflow-hidden relative">
+        <div
+          className={`sidebar absolute sm:relative h-full ${
+            isSidebarOpen ? 'w-[80%] sm:w-[18rem] ' : 'w-0 border-r-0'
+          } overflow-hidden bg-background z-50 flex-shrink-0 border-r flex flex-col transition-all duration-500 text-nowrap flex-nowrap`}
+        >
+          <div className="flex flex-col gap-5 p-5 border-b border-border">
+            <div>
+              <Button
+                variant="secondary"
+                className="justify-start w-full text-[1rem] px-3"
+                onClick={() => {
+                  console.log(
+                    'Inner HTML:',
+                    document.querySelector('.ProseMirror')?.innerHTML
+                  );
+                }}
+              >
+                <Plus className="h-5 w-5 mr-2 stroke-[2px] flex-shrink-0" />
+                New Note
+              </Button>
+            </div>
+            <div>
+              <div className="h-10 rounded-md border-[1.5px] border-border px-3 flex justify-start items-center">
+                <Search className="h-5 w-5 scale-95 mr-2 text-zinc-500 stroke-[2px] flex-shrink-0" />
+                <div>
+                  <Input
+                    placeholder="Search"
+                    className="w-full bg-transparent p-0 text-[1rem] placeholder-secondary border-none focus:border-none focus:ring-0"
+                    onChange={handleSearchChange}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="h-10 rounded-md border-[1.5px] border-border px-3 flex justify-start items-center">
-              <Search className="h-5 w-5 scale-95 mr-2 text-zinc-500 stroke-[2px] flex-shrink-0" />
-              <div>
-                <Input
-                  placeholder="Search"
-                  className="w-full bg-transparent p-0 text-[1rem] placeholder-secondary border-none focus:border-none focus:ring-0"
-                  onChange={handleSearchChange}
-                />
+          <ScrollArea className="flex-1 px-5">
+            <div className="py-5">
+              <div className="flex flex-col gap-1 cursor-pointer">
+                {filteredNotes.map(({ title }, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setSelectedNote(index)}
+                    className={`noteitem group relative  h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
+                      selectedNote === index ? 'bg-secondary' : ''
+                    }`}
+                  >
+                    <FileText className="h-5 w-5 mr-2 stroke-2 flex-shrink-0" />
+                    <div className="text-nowrap  overflow-hidden">{title}</div>
+                    <div
+                      className={`shadowcover transition-all absolute bg-gradient-to-r ${
+                        selectedNote === index
+                          ? 'from-transparent to-secondary'
+                          : 'from-transparent to-background'
+                      } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
+                    ></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </ScrollArea>
+          <div className="px-5 mb-5 border-t border-border pt-5">
+            <div className="h-10 w-full rounded-md bg-secondary px-3 flex justify-start items-center">
+              <User className="h-[22px] flex-shrink-0" />
+              <div className="ml-2 text-[1rem] font-semibold">
+                {session.user.name}
               </div>
             </div>
           </div>
         </div>
-        <ScrollArea className="flex-1 px-5">
-          <div className="py-5">
-            <div className="flex flex-col gap-1 cursor-pointer">
-              {filteredNotes.map(({ title }, index) => (
-                <div
-                  key={index}
-                  onClick={() => setSelectedNote(index)}
-                  className={`noteitem group relative  h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
-                    selectedNote === index ? 'bg-secondary' : ''
-                  }`}
-                >
-                  <FileText className="h-5 w-5 mr-2 stroke-2 flex-shrink-0" />
-                  <div className="text-nowrap  overflow-hidden">{title}</div>
-                  <div
-                    className={`shadowcover transition-all absolute bg-gradient-to-r ${
-                      selectedNote === index
-                        ? 'from-transparent to-secondary'
-                        : 'from-transparent to-background'
-                    } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
-                  ></div>
-                </div>
-              ))}
+        <div className="mainsection w-full flex flex-col relative overflow-auto flex-shrink-0 flex-1">
+          <div className="header hidden sm:flex justify-between items-center w-full p-5">
+            <div className="flex gap-5">
+              <Button
+                variant={'secondary'}
+                className="h-10 w-10"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              >
+                {isSidebarOpen ? (
+                  <PanelLeftClose className="h-5 w-5 flex-shrink-0" />
+                ) : (
+                  <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
+                )}
+              </Button>
+              <Logo />
             </div>
+            <ModeToggle />
           </div>
-        </ScrollArea>
-        <div className="px-5 mb-5 border-t border-border pt-5">
-          <div className="h-10 w-full rounded-md bg-secondary px-3 flex justify-start items-center">
-            <User className="h-[22px] flex-shrink-0" />
-            <div className="ml-2 text-[1rem] font-semibold">
-              {session.user.name}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="mainsection w-full flex flex-col relative overflow-auto flex-shrink-0 flex-1">
-        <div className="header flex justify-between items-center w-full p-5">
-          <div className="flex gap-5">
-            <Button
-              variant={'secondary'}
-              className="h-10 w-10"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            >
-              {isSidebarOpen ? (
-                <PanelLeftClose className="h-5 w-5 flex-shrink-0" />
-              ) : (
-                <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
-              )}
-            </Button>
-            <Logo />
-          </div>
-          <ModeToggle />
-        </div>
-        <div className="scrollarea overflow-auto">
           <div
-            className={`editorsection h-full px-5 sm:px-10 ${
-              isSidebarOpen ? 'lg:px-24' : 'lg:px-60'
-            } py-14 flex flex-1 flex-col gap-6 transition-all duration-500`}
+            className={`scrollarea  overflow-auto flex-1 transition-all duration-500
+              ${isSidebarOpen ? 'opacity-30 sm:opacity-100' : 'opacity-100'}`}
           >
-            <div className="title w-full h-fit font-bold text-5xl leading-normal text-balance">
-              {selectedNote !== null
-                ? notesArray[selectedNote].title
-                : 'Select a note'}
-            </div>
-            <div className="w-full pb-40">
-              <Tiptap />
+            <div
+              className={`editorsection h-full px-5 sm:px-10 ${
+                isSidebarOpen ? 'lg:px-24' : 'lg:px-60'
+              } py-5 sm:py-14 flex flex-1 flex-col gap-6 transition-all duration-500`}
+            >
+              <div
+                className="title w-full h-fit font-bold text-3xl sm:text-5xl text-balance"
+                style={{ lineHeight: '1.2' }}
+              >
+                {selectedNote !== null
+                  ? notesArray[selectedNote].title
+                  : 'Select a note'}
+              </div>
+              <div className="w-full pb-40 flex-1">
+                <Tiptap />
+              </div>
             </div>
           </div>
         </div>

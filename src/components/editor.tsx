@@ -23,6 +23,7 @@ import {
 import { Button } from './ui/button';
 import ListItem from '@tiptap/extension-list-item';
 import { BubbleMenu as BubbleMenuExtension } from '@tiptap/extension-bubble-menu';
+import { EditorState } from '@tiptap/pm/state';
 
 const Tiptap = () => {
   const editor = useEditor({
@@ -109,7 +110,7 @@ closure(); // Output: 10</code></pre><p>In this example, <code>innerFunction</co
       )}
       <div v-if={editor}>
         {editor && (
-          <div className="w-full absolute bottom-0 flex justify-center items-center py-3 left-0 z-10">
+          <div className="w-full absolute bottom-0 hidden sm:flex justify-center items-center py-3 left-0 z-10">
             <div className="bg-background border-[1.5px] border-border w-fit p-2 rounded-xl flex items-center gap-2 flex-shrink-0">
               <Button
                 onClick={() => editor.chain().focus().toggleBold().run()}
