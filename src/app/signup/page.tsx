@@ -109,7 +109,7 @@ export default function SignUp() {
           <ModeToggle />
         </div>
         {!isOtpSent ? (
-          <Card className="w-[90%] sm:w-80 border-0 sm:border scale-100 xl:scale-105 2xl:scale-125">
+          <Card className="w-[90%] sm:w-80 border-0 sm:border">
             <CardHeader className="w-full">
               <CardTitle className="text-[26px] font-bold">Sign Up</CardTitle>
               <CardDescription className="font-semibold text-[14px]">

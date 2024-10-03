@@ -39,7 +39,7 @@ const Dashboard = () => {
   const { data: session, status }: any = useSession();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [selectedNote, setSelectedNote] = useState<number | null>(0);
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -132,16 +132,16 @@ const Dashboard = () => {
                 {filteredNotes.map(({ title }, index) => (
                   <div
                     key={index}
-                    onClick={() => setSelectedNote(index)}
+                    onClick={() => setSelectedNote(title)}
                     className={`noteitem group relative  h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
-                      selectedNote === index ? 'bg-secondary' : ''
+                      selectedNote === title ? 'bg-secondary' : ''
                     }`}
                   >
                     <FileText className="h-5 w-5 mr-2 stroke-2 flex-shrink-0" />
                     <div className="text-nowrap  overflow-hidden">{title}</div>
                     <div
                       className={`shadowcover transition-all absolute bg-gradient-to-r ${
-                        selectedNote === index
+                        selectedNote === title
                           ? 'from-transparent to-secondary'
                           : 'from-transparent to-background'
                       } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
@@ -184,7 +184,7 @@ const Dashboard = () => {
           >
             <div
               className={`editorsection h-full px-5 sm:px-10 ${
-                isSidebarOpen ? 'lg:px-24' : 'lg:px-60'
+                isSidebarOpen ? 'lg:px-28 2xl:px-60' : 'lg:px-64 2xl:px-96'
               } py-5 sm:py-14 flex flex-1 flex-col gap-6 transition-all duration-500`}
             >
               <div
@@ -192,7 +192,8 @@ const Dashboard = () => {
                 style={{ lineHeight: '1.2' }}
               >
                 {selectedNote !== null
-                  ? notesArray[selectedNote].title
+                  ? // ? notesArray[selectedNote].title
+                    selectedNote
                   : 'Select a note'}
               </div>
               <div className="w-full pb-40 flex-1">
