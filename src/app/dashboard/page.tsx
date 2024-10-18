@@ -19,6 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import Loader from '@/components/ui/loader';
 import Logo from '@/components/ui/logo';
 import debounce from 'lodash.debounce';
+import { toast } from 'sonner';
 
 const Tiptap = dynamic(() => import('@/components/editor'), { ssr: false });
 
@@ -80,7 +81,9 @@ const Dashboard = () => {
           <Button
             variant={'secondary'}
             className="h-10 w-10"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            onClick={() => {
+              setIsSidebarOpen(!isSidebarOpen);
+            }}
           >
             {isSidebarOpen ? (
               <PanelLeftClose className="h-5 w-5 flex-shrink-0" />
@@ -102,12 +105,6 @@ const Dashboard = () => {
               <Button
                 variant="secondary"
                 className="justify-start w-full text-[1rem] px-3"
-                onClick={() => {
-                  console.log(
-                    'Inner HTML:',
-                    document.querySelector('.ProseMirror')?.innerHTML
-                  );
-                }}
               >
                 <Plus className="h-5 w-5 mr-2 stroke-[2px] flex-shrink-0" />
                 New Note
