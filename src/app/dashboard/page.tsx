@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ModeToggle } from '@/components/ui/themetoggle';
 import { Button } from '@/components/ui/button';
+import { LockOpen, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Suspense } from 'react';
 import {
   Search,
   Plus,
@@ -18,29 +20,20 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Loader from '@/components/ui/loader';
 import Logo from '@/components/ui/logo';
+import LogoMark from '@/components/ui/logomark';
 import debounce from 'lodash.debounce';
 import { toast } from 'sonner';
 
 const Tiptap = dynamic(() => import('@/components/editor'), { ssr: false });
 
-const notesArray = [
-  { title: 'Closures in JavaScript' },
-  { title: 'Understanding React Components' },
-  { title: 'State and Props in React' },
-  { title: 'JavaScript ES6 Features' },
-  { title: 'Building a Todo App with React' },
-  { title: 'Introduction to TypeScript' },
-  { title: 'Using Hooks in React' },
-  { title: 'Managing State with Redux' },
-  { title: 'React Router for Navigation' },
-  { title: 'Deploying React Applications' },
-];
+const notesArray = [{ title: 'Closures in JavaScript' }];
 
 const Dashboard = () => {
   const { data: session, status }: any = useSession();
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  const [canEdit, setCanEdit] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -61,6 +54,10 @@ const Dashboard = () => {
       ),
     [searchQuery]
   );
+
+  const toggleEdit = useCallback(() => {
+    setCanEdit((prevCanEdit) => !prevCanEdit);
+  }, []);
 
   if (status === 'loading') {
     return (
@@ -92,7 +89,20 @@ const Dashboard = () => {
             )}
           </Button>
         </div>
-        <ModeToggle />
+        <div className="flex justify-center items-center gap-5">
+          <Button
+            className="h-10 w-10"
+            variant={'secondary'}
+            onClick={toggleEdit}
+          >
+            {canEdit ? (
+              <LockOpen className="h-5 w-5 flex-shrink-0" />
+            ) : (
+              <Lock className="h-5 w-5 flex-shrink-0" />
+            )}
+          </Button>
+          <ModeToggle />
+        </div>
       </div>
       <div className="flex flex-1 overflow-hidden relative">
         <div
@@ -129,7 +139,12 @@ const Dashboard = () => {
                 {filteredNotes.map(({ title }, index) => (
                   <div
                     key={index}
-                    onClick={() => setSelectedNote(title)}
+                    onClick={() => {
+                      setSelectedNote(title);
+                      if (window.innerWidth < 640) {
+                        setIsSidebarOpen(false);
+                      }
+                    }}
                     className={`noteitem group relative  h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
                       selectedNote === title ? 'bg-secondary' : ''
                     }`}
@@ -173,7 +188,20 @@ const Dashboard = () => {
               </Button>
               <Logo />
             </div>
-            <ModeToggle />
+            <div className="flex justify-center items-center gap-5">
+              <Button
+                className="h-10 w-10"
+                variant={'secondary'}
+                onClick={toggleEdit}
+              >
+                {canEdit ? (
+                  <LockOpen className="h-5 w-5 flex-shrink-0" />
+                ) : (
+                  <Lock className="h-5 w-5 flex-shrink-0" />
+                )}
+              </Button>
+              <ModeToggle />
+            </div>
           </div>
           <div
             className={`scrollarea  overflow-auto flex-1 transition-all duration-500
@@ -185,16 +213,24 @@ const Dashboard = () => {
               } py-5 sm:py-14 flex flex-1 flex-col gap-6 transition-all duration-500`}
             >
               <div
-                className="title w-full h-fit font-bold text-3xl sm:text-5xl text-balance"
+                className="title w-full h-fit font-bold text-5xl sm:text-5xl text-balance"
                 style={{ lineHeight: '1.2' }}
               >
-                {selectedNote !== null
-                  ? // ? notesArray[selectedNote].title
-                    selectedNote
-                  : 'Select a note'}
+                {selectedNote !== null ? (
+                  <input
+                    type="text"
+                    readOnly={!canEdit}
+                    value={selectedNote}
+                    className="bg-transparent border-none focus:ring-0 w-full outline-none"
+                  />
+                ) : (
+                  'Select a note'
+                )}
               </div>
               <div className="w-full pb-40 flex-1">
-                <Tiptap />
+                <Suspense fallback={<Loader />}>
+                  <Tiptap content="" />
+                </Suspense>
               </div>
             </div>
           </div>

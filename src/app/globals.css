@@ -14,6 +14,7 @@
     --primary-foreground: 0 0% 98%;
     --secondary: 240 4.8% 94%;
     --secondary-foreground: 240 5.9% 10%;
+    --secondary-block: 240 4.8% 94%;
     --muted: 240 4.9% 83.9%;
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 240 4.8% 95.9%;
@@ -44,6 +45,7 @@
     --primary-foreground: 240 5.9% 10%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 90%;
+    --secondary-block: 240 3.7% 15.9%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
     --accent: 240 3.7% 15.9%;
@@ -120,7 +122,7 @@ ol {
 }
 
 pre {
-  @apply bg-secondary text-secondary-foreground p-5 rounded-lg w-full text-nowrap overflow-x-auto h-fit flex-shrink-0;
+  @apply dark:bg-zinc-900 border-[1.2px] bg-zinc-100 border-separate text-secondary-foreground p-5 rounded-lg w-full text-nowrap overflow-x-auto h-fit flex-shrink-0;
 }
 
 code {
@@ -132,7 +134,7 @@ pre::-webkit-scrollbar {
 }
 
 pre code {
-  @apply bg-secondary text-secondary-foreground opacity-85 p-0 rounded-none overflow-x-auto whitespace-pre;
+  @apply bg-zinc-100 dark:bg-zinc-900 text-secondary-foreground opacity-85 p-0 rounded-none overflow-x-auto whitespace-pre;
 }
 
 .tiptap {
