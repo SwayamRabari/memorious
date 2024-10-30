@@ -163,11 +163,25 @@ const Dashboard = () => {
               </div>
             </div>
           </ScrollArea>
-          <div className="px-5 mb-5 border-t border-border pt-5">
-            <div className="h-10 w-full rounded-md bg-secondary px-3 flex justify-start items-center">
-              <User className="h-[22px] flex-shrink-0" />
-              <div className="ml-2 text-[1rem] font-semibold">
-                {session.user.name}
+          <div className="mb-5 border-t border-border pt-5 px-5">
+            <div className="h-fit w-full flex justify-normal items-center gap-3 relative overflow-hidden">
+              <div className="bg-secondary p-3 rounded-md flex">
+                <div className="h-5 w-5 font-semibold text-[1.4rem] flex items-center justify-center rounded">
+                  {session.user.name[0].toUpperCase()}
+                </div>
+              </div>
+              {/* add a gradient closure for overfloeing text! */}
+              <div className="userinfo">
+                <div
+                  className="absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-background to-transparent pointer-events-none"
+                  style={{ display: 'inline-block' }}
+                ></div>
+                <div className="font-semibold text-[1rem] w-full">
+                  {session.user.name}
+                </div>
+                <div className="text-muted-foreground text-[0.80rem] font-semibold">
+                  {session.user.email}
+                </div>
               </div>
             </div>
           </div>
@@ -216,20 +230,23 @@ const Dashboard = () => {
                 className="title w-full h-fit font-bold text-5xl sm:text-5xl text-balance"
                 style={{ lineHeight: '1.2' }}
               >
-                {selectedNote !== null ? (
-                  <input
-                    type="text"
-                    readOnly={!canEdit}
-                    value={selectedNote}
-                    className="bg-transparent border-none focus:ring-0 w-full outline-none"
-                  />
-                ) : (
-                  'Select a note'
-                )}
+                <textarea
+                  readOnly={!canEdit}
+                  className="bg-transparent border-none focus:ring-0 w-full outline-none resize-none overflow-hidden -mb-4"
+                  placeholder="Untitled"
+                  value={selectedNote || ''}
+                  rows={1}
+                  onInput={(e) => {
+                    (e.target as HTMLTextAreaElement).style.height = 'auto';
+                    (e.target as HTMLTextAreaElement).style.height = `${
+                      (e.target as HTMLTextAreaElement).scrollHeight
+                    }px`;
+                  }}
+                />
               </div>
               <div className="w-full pb-40 flex-1">
                 <Suspense fallback={<Loader />}>
-                  <Tiptap content="" />
+                  <Tiptap content="" editable={canEdit} />
                 </Suspense>
               </div>
             </div>
