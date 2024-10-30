@@ -169,7 +169,9 @@ const Tiptap = ({ content, editable }: TiptapProps) => {
                         'Content-Type': 'application/json',
                       },
                       body: JSON.stringify({
-                        prompt: promt,
+                        prompt:
+                          promt +
+                          '\nAdditional context: do not include main heading for the generated content.',
                       }),
                     });
 
