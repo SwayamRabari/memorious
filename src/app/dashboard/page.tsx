@@ -141,7 +141,10 @@ const Dashboard = () => {
                     key={index}
                     onClick={() => {
                       setSelectedNote(title);
-                      if (window.innerWidth < 640) {
+                      if (
+                        typeof window !== 'undefined' &&
+                        window.innerWidth < 640
+                      ) {
                         setIsSidebarOpen(false);
                       }
                     }}
