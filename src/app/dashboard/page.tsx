@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { LockOpen, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Suspense } from 'react';
+import TextAreaAutosize from 'react-textarea-autosize';
 import {
   Search,
   Plus,
@@ -231,24 +232,20 @@ const Dashboard = () => {
             <div
               className={`editorsection h-full px-5 sm:px-10 ${
                 isSidebarOpen ? 'lg:px-28 2xl:px-60' : 'lg:px-64 2xl:px-96'
-              } py-5 sm:py-14 flex flex-1 flex-col gap-6 transition-all duration-500`}
+              } py-5 sm:py-14 flex flex-1 flex-col gap-2 transition-all duration-500`}
             >
               <div
-                className="title w-full h-fit font-bold text-5xl sm:text-5xl text-balance"
+                className="title w-full h-fit font-bold text-3xl sm:text-5xl text-balance"
                 style={{ lineHeight: '1.2' }}
               >
-                <textarea
-                  readOnly={!canEdit}
-                  className="bg-transparent border-none focus:ring-0 w-full outline-none resize-none overflow-hidden -mb-4"
-                  placeholder="Untitled"
+                <TextAreaAutosize
+                  className="w-full bg-transparent outline-none text-balance font-bold text-3xl sm:text-5xl placeholder:text-muted-foreground resize-none leading-snug"
                   value={selectedNote || ''}
-                  rows={1}
-                  onInput={(e) => {
-                    (e.target as HTMLTextAreaElement).style.height = 'auto';
-                    (e.target as HTMLTextAreaElement).style.height = `${
-                      (e.target as HTMLTextAreaElement).scrollHeight
-                    }px`;
-                  }}
+                  placeholder="Untitled"
+                  readOnly={!canEdit}
+                  minRows={1}
+                  maxRows={5}
+                  onChange={(e) => setSelectedNote(e.target.value)}
                 />
               </div>
               <div className="w-full pb-40 flex-1">

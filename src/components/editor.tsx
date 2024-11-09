@@ -136,7 +136,7 @@ const Tiptap = ({ content, editable }: TiptapProps) => {
               } border-[1.5px] border-border rounded-xl bg-background p-2 transition-all duration-300`}
             >
               <div
-                className={`input flex relative bg-zinc-100 dark:bg-zinc-900 z-10 rounded-md overflow-hidden ${
+                className={`input flex relative bg-secondary z-10 rounded-md overflow-hidden ${
                   showPromptInput ? 'h-10 mb-2' : 'h-0 mb-0 opacity-0'
                 } transition-all duration-300`}
               >
@@ -151,7 +151,11 @@ const Tiptap = ({ content, editable }: TiptapProps) => {
                   className="font-medium border-0 h-10 focus:ring-0 bg-transparent transition-all duration-300"
                 />
                 <button
-                  className="h-10 w-10 flex justify-center items-center  rounded-md right-0"
+                  className={`h-10 w-10 flex justify-center items-center  rounded-md right-0 ${
+                    responseLoading
+                      ? 'text-muted-foreground'
+                      : 'text-foreground'
+                  } transition-all duration-300`}
                   disabled={responseLoading}
                   onClick={async () => {
                     if (!promt) {
