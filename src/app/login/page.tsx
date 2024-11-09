@@ -16,6 +16,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { signIn } from 'next-auth/react';
+
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -36,32 +38,24 @@ export default function Login() {
     }
 
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success('Logged in successfully', {
-          duration: 2000,
-          id: toastId,
-        });
-        window.location.href = '/dashboard';
-        return data;
-      } else {
+      if (result?.error) {
         toast.error('Invalid email or password', {
           duration: 3000,
           id: toastId,
         });
-        console.error('Error processing request:', data);
+        console.error('Error processing request:', result.error);
+      } else {
+        toast.success('Signed in successfully!', {
+          duration: 2000,
+          id: toastId,
+        });
+        router.push('/dashboard');
       }
     } catch (error) {
       console.error('Error processing request:', error);

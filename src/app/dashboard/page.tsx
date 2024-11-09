@@ -20,13 +20,17 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Loader from '@/components/ui/loader';
 import Logo from '@/components/ui/logo';
-import LogoMark from '@/components/ui/logomark';
 import debounce from 'lodash.debounce';
-import { toast } from 'sonner';
 
 const Tiptap = dynamic(() => import('@/components/editor'), { ssr: false });
 
-const notesArray = [{ title: 'Closures in JavaScript' }];
+const notesArray = [
+  { title: 'Closures in JavaScript' },
+  { title: 'Understanding React Hooks' },
+  { title: 'TypeScript Basics' },
+  { title: 'Next.js Routing' },
+  { title: 'State Management with Redux' },
+];
 
 const Dashboard = () => {
   const { data: session, status }: any = useSession();
