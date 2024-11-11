@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { LockOpen, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Suspense } from 'react';
+import Fuse from 'fuse.js';
+
 import TextAreaAutosize from 'react-textarea-autosize';
 import {
   Search,
@@ -47,18 +49,25 @@ const Dashboard = () => {
     }
   }, [status, session, router]);
 
+  const fuse = useMemo(() => {
+    return new Fuse(notesArray, {
+      keys: ['title'],
+      threshold: 0.5,
+    });
+  }, []);
+
   const handleSearchChange = useCallback(
     debounce((e) => setSearchQuery(e.target.value), 300),
     []
   );
 
-  const filteredNotes = useMemo(
-    () =>
-      notesArray.filter((note) =>
-        note.title.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [searchQuery]
-  );
+  const filteredNotes = useMemo(() => {
+    if (!searchQuery) {
+      return notesArray;
+    }
+    const result = fuse.search(searchQuery);
+    return result.map(({ item }) => item);
+  }, [searchQuery, fuse]);
 
   const toggleEdit = useCallback(() => {
     setCanEdit((prevCanEdit) => !prevCanEdit);
@@ -174,7 +183,7 @@ const Dashboard = () => {
           <div className="mb-5 border-t border-border pt-5 px-5">
             <div className="h-fit w-full flex justify-normal items-center gap-3 relative overflow-hidden">
               <div className="bg-secondary p-3 rounded-md flex">
-                <div className="h-5 w-5 font-semibold text-[1.4rem] flex items-center justify-center rounded">
+                <div className="h-5 w-5 font-semibold text-[1.4rem] flex items-center justify-center">
                   {session.user.name[0].toUpperCase()}
                 </div>
               </div>

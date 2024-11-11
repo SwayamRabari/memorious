@@ -28,7 +28,6 @@ import { Button } from './ui/button';
 import Star from './icons/star';
 import ListItem from '@tiptap/extension-list-item';
 import { BubbleMenu as BubbleMenuExtension } from '@tiptap/extension-bubble-menu';
-import { EditorView } from '@tiptap/pm/view';
 import { useState, useRef, useEffect } from 'react';
 import { Input } from './ui/input';
 
@@ -51,6 +50,116 @@ const Tiptap = ({ content, editable }: TiptapProps) => {
     }
   }, [showPromptInput]);
 
+  const handlePromptSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!promt) {
+      toast.error('Prompt cannot be empty.', {
+        id: 'generate',
+      });
+      return;
+    }
+
+    setResponseLoading(true);
+    toast.loading('Generating...', {
+      id: 'generate',
+    });
+
+    try {
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt:
+            promt +
+            '\nAdditional context: do not include main heading for the generated content.',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Generated successfully!', {
+          duration: 2000,
+          id: 'generate',
+        });
+
+        const html = await marked(data.response);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        doc.querySelectorAll('pre code').forEach((codeBlock) => {
+          const lines = codeBlock.textContent?.split('\n');
+          if (lines && lines.length > 1) {
+            lines.pop();
+            codeBlock.textContent = lines.join('\n');
+          }
+        });
+
+        if (!editor) {
+          toast.error('Editor is not initialized.', {
+            id: 'generate',
+          });
+          return;
+        }
+
+        const fragment = ProseMirrorDOMParser.fromSchema(
+          editor.view.state.schema
+        ).parse(doc.body);
+
+        const { tr, selection } = editor.view.state;
+        let transaction = tr;
+
+        const isInline = editor.view.state.selection.$from.parent.inlineContent;
+        if (isInline) {
+          transaction = tr.replaceSelectionWith(fragment).scrollIntoView();
+        } else {
+          transaction = tr
+            .insert(
+              selection.from,
+              editor.view.state.schema.nodes.hard_break.create()
+            )
+            .replaceSelectionWith(fragment)
+            .scrollIntoView();
+        }
+
+        // Additional cleanup of empty blocks if needed
+        const startPos = transaction.selection.from - fragment.content.size;
+        if (startPos > 0) {
+          const prevNode = transaction.doc.nodeAt(startPos - 1);
+          if (prevNode && prevNode.isTextblock && prevNode.content.size === 0) {
+            const deleteStart = Math.max(startPos - prevNode.nodeSize, 0);
+            transaction = transaction.delete(deleteStart, startPos);
+          }
+        } else if (startPos === 0) {
+          const firstNode = transaction.doc.firstChild;
+          if (
+            firstNode &&
+            firstNode.isTextblock &&
+            firstNode.content.size === 0
+          ) {
+            transaction = transaction.delete(0, firstNode.nodeSize);
+          }
+        }
+
+        editor.view.dispatch(transaction);
+      } else {
+        toast.error('An error occurred.', {
+          id: 'generate',
+        });
+      }
+    } catch (error) {
+      toast.error('An error occurred.', {
+        id: 'generate',
+      });
+    } finally {
+      setResponseLoading(false);
+      setPrompt('');
+    }
+  };
+
   const editor = useEditor({
     editorProps: {
       attributes: {
@@ -70,6 +179,33 @@ const Tiptap = ({ content, editable }: TiptapProps) => {
     editable: editable,
     content: content || ``,
   });
+
+  const promptInput = (
+    <form
+      onSubmit={handlePromptSubmit}
+      className={`input flex relative bg-secondary z-10 rounded-md overflow-hidden ${
+        showPromptInput ? 'h-10 mb-2' : 'h-0 mb-0 opacity-0'
+      } transition-all duration-300`}
+    >
+      <Input
+        placeholder="Enter a prompt"
+        disabled={responseLoading}
+        ref={inputRef}
+        value={promt}
+        onChange={(e) => setPrompt(e.target.value)}
+        className="font-medium border-0 h-10 focus:ring-0 bg-transparent transition-all duration-300"
+      />
+      <button
+        type="submit"
+        className={`h-10 w-10 flex justify-center items-center rounded-md right-0 ${
+          responseLoading ? 'text-muted-foreground' : 'text-foreground'
+        } transition-all duration-300`}
+        disabled={responseLoading}
+      >
+        <Forward className="h-5 w-5" />
+      </button>
+    </form>
+  );
 
   return (
     <div spellCheck="false" className="w-full">
@@ -135,144 +271,7 @@ const Tiptap = ({ content, editable }: TiptapProps) => {
                 editable ? 'opacity-100' : 'opacity-0 pointer-events-none'
               } border-[1.5px] border-border rounded-xl bg-background p-2 transition-all duration-300`}
             >
-              <div
-                className={`input flex relative bg-secondary z-10 rounded-md overflow-hidden ${
-                  showPromptInput ? 'h-10 mb-2' : 'h-0 mb-0 opacity-0'
-                } transition-all duration-300`}
-              >
-                <Input
-                  placeholder="Enter a prompt"
-                  disabled={responseLoading}
-                  ref={inputRef}
-                  value={promt}
-                  onChange={(e) => {
-                    setPrompt(e.target.value);
-                  }}
-                  className="font-medium border-0 h-10 focus:ring-0 bg-transparent transition-all duration-300"
-                />
-                <button
-                  className={`h-10 w-10 flex justify-center items-center  rounded-md right-0 ${
-                    responseLoading
-                      ? 'text-muted-foreground'
-                      : 'text-foreground'
-                  } transition-all duration-300`}
-                  disabled={responseLoading}
-                  onClick={async () => {
-                    if (!promt) {
-                      toast.error('Prompt cannot be empty.');
-                      return;
-                    }
-
-                    setResponseLoading(true);
-
-                    toast.loading('Generating...');
-
-                    const response = await fetch('/api/gemini', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        prompt:
-                          promt +
-                          '\nAdditional context: do not include main heading for the generated content.',
-                      }),
-                    });
-
-                    const data = await response.json();
-
-                    setResponseLoading(false);
-                    setPrompt('');
-                    toast.dismiss();
-
-                    if (response.ok) {
-                      // Show success toast
-                      toast.success('Generated successfully!', {
-                        duration: 2000,
-                      });
-
-                      // Convert markdown text to HTML
-                      const html = await marked(data.response);
-                      const parser = new DOMParser();
-                      const doc = parser.parseFromString(html, 'text/html');
-
-                      // Remove last line from every code block
-                      doc.querySelectorAll('pre code').forEach((codeBlock) => {
-                        const lines = codeBlock.textContent?.split('\n');
-                        if (lines && lines.length > 1) {
-                          lines.pop(); // Remove the last line
-                          codeBlock.textContent = lines.join('\n');
-                        }
-                      });
-
-                      const fragment = ProseMirrorDOMParser.fromSchema(
-                        editor.view.state.schema
-                      ).parse(doc.body);
-
-                      const { tr, selection } = editor.view.state;
-                      let transaction = tr;
-
-                      // Check if cursor is in an inline or block position
-                      const isInline =
-                        editor.view.state.selection.$from.parent.inlineContent;
-                      if (isInline) {
-                        // Insert directly if inline
-                        transaction = tr
-                          .replaceSelectionWith(fragment)
-                          .scrollIntoView();
-                      } else {
-                        // If block, add a new line before inserting
-                        transaction = tr
-                          .insert(
-                            selection.from,
-                            editor.view.state.schema.nodes.hard_break.create()
-                          )
-                          .replaceSelectionWith(fragment)
-                          .scrollIntoView();
-                      }
-
-                      // Additional cleanup of empty blocks if needed
-                      const startPos =
-                        transaction.selection.from - fragment.content.size;
-                      if (startPos > 0) {
-                        const prevNode = transaction.doc.nodeAt(startPos - 1);
-                        if (
-                          prevNode &&
-                          prevNode.isTextblock &&
-                          prevNode.content.size === 0
-                        ) {
-                          const deleteStart = Math.max(
-                            startPos - prevNode.nodeSize,
-                            0
-                          );
-                          transaction = transaction.delete(
-                            deleteStart,
-                            startPos
-                          );
-                        }
-                      } else if (startPos === 0) {
-                        const firstNode = transaction.doc.firstChild;
-                        if (
-                          firstNode &&
-                          firstNode.isTextblock &&
-                          firstNode.content.size === 0
-                        ) {
-                          transaction = transaction.delete(
-                            0,
-                            firstNode.nodeSize
-                          );
-                        }
-                      }
-
-                      editor.view.dispatch(transaction);
-                    } else {
-                      toast.error('An error occurred.');
-                    }
-                  }}
-                >
-                  <Forward className="h-5 w-5" />
-                </button>
-              </div>
+              {promptInput}
               <div className="toolbar w-fit flex items-center gap-2 flex-shrink-0 z-20">
                 <Button
                   onClick={() => editor.chain().focus().toggleBold().run()}
