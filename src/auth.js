@@ -52,9 +52,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             where: { email },
           });
 
-          if (alreadyUser) {
-            return true;
+          // If user already exists, with credentials, then return error
+          if (alreadyUser && alreadyUser.provider === 'credentials') {
+            throw new Error('User already exists with credentials');
           }
+
           await prisma.user.create({
             data: {
               email,
