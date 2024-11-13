@@ -34,9 +34,10 @@ import { Input } from './ui/input';
 interface TiptapProps {
   content: string;
   editable?: boolean;
+  onContentChange?: (content: string) => void;
 }
 
-const Tiptap = ({ content, editable }: TiptapProps) => {
+const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
   const [promt, setPrompt] = useState<string>('');
   const [responseLoading, setResponseLoading] = useState<boolean>(false);
   const [showPromptInput, setShowPromptInput] = useState<boolean>(false);
@@ -177,8 +178,18 @@ const Tiptap = ({ content, editable }: TiptapProps) => {
       }),
     ],
     editable: editable,
-    content: content || ``,
+    content: content || '',
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      onContentChange && onContentChange(html);
+    },
   });
+
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content, false);
+    }
+  }, [content, editor]);
 
   const promptInput = (
     <form

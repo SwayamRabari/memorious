@@ -1,22 +1,22 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ModeToggle } from '@/components/ui/themetoggle';
 import { Button } from '@/components/ui/button';
-import { LockOpen, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Suspense } from 'react';
 import Fuse from 'fuse.js';
+import { toast } from 'sonner';
 
 import TextAreaAutosize from 'react-textarea-autosize';
 import {
   Search,
+  Lock,
+  LockOpen,
   Plus,
   FileText,
-  User,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
@@ -27,21 +27,21 @@ import debounce from 'lodash.debounce';
 
 const Tiptap = dynamic(() => import('@/components/editor'), { ssr: false });
 
-const notesArray = [
-  { title: 'Closures in JavaScript' },
-  { title: 'Understanding React Hooks' },
-  { title: 'TypeScript Basics' },
-  { title: 'Next.js Routing' },
-  { title: 'State Management with Redux' },
-];
-
 const Dashboard = () => {
-  const { data: session, status }: any = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
-  const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  interface Note {
+    id: string;
+    title: string;
+    content: string;
+  }
+
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [canEdit, setCanEdit] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [notesArray, setNotesArray] = useState<Note[]>([]);
+  const [selectedNoteContent, setSelectedNoteContent] = useState<string>('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -49,12 +49,11 @@ const Dashboard = () => {
     }
   }, [status, session, router]);
 
-  const fuse = useMemo(() => {
-    return new Fuse(notesArray, {
-      keys: ['title'],
-      threshold: 0.5,
-    });
-  }, []);
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchNotes();
+    }
+  }, [status]);
 
   const handleSearchChange = useCallback(
     debounce((e) => setSearchQuery(e.target.value), 300),
@@ -65,13 +64,53 @@ const Dashboard = () => {
     if (!searchQuery) {
       return notesArray;
     }
+    const fuse = new Fuse(notesArray, {
+      keys: ['title'],
+      threshold: 0.5,
+    });
     const result = fuse.search(searchQuery);
     return result.map(({ item }) => item);
-  }, [searchQuery, fuse]);
+  }, [searchQuery, notesArray]);
 
   const toggleEdit = useCallback(() => {
     setCanEdit((prevCanEdit) => !prevCanEdit);
   }, []);
+
+  const fetchNotes = async () => {
+    try {
+      const response = await fetch(`/api/notes/${session?.user?.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch notes');
+      }
+      const data = await response.json();
+      setNotesArray(data && data.notes);
+      console.log(data);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+      toast.error('Failed to fetch notes.');
+    }
+  };
+
+  useEffect(() => {
+    // Update selectedNoteContent when selectedNote changes
+    if (selectedNote) {
+      setSelectedNoteContent(selectedNote.content);
+    } else {
+      setSelectedNoteContent('');
+    }
+  }, [selectedNote]);
+
+  const handleSelectNote = (note: any) => {
+    setSelectedNote(note);
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      setIsSidebarOpen(false);
+    }
+  };
 
   if (status === 'loading') {
     return (
@@ -129,6 +168,27 @@ const Dashboard = () => {
               <Button
                 variant="secondary"
                 className="justify-start w-full text-[1rem] px-3"
+                onClick={() => {
+                  fetch('/api/notes', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                      userId: session?.user?.id,
+                      title: selectedNote?.title || 'Untitled',
+                      content: selectedNote?.content || '',
+                    }),
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      setNotesArray([...notesArray, data.note]);
+                      setSelectedNote(data.note);
+                    })
+                    .catch((error) => {
+                      toast.error('Failed to create new note.', error);
+                    });
+                }}
               >
                 <Plus className="h-5 w-5 mr-2 stroke-[2px] flex-shrink-0" />
                 New Note
@@ -150,27 +210,21 @@ const Dashboard = () => {
           <ScrollArea className="flex-1 px-5">
             <div className="py-5">
               <div className="flex flex-col gap-1 cursor-pointer">
-                {filteredNotes.map(({ title }, index) => (
+                {filteredNotes.map((note, index) => (
                   <div
-                    key={index}
-                    onClick={() => {
-                      setSelectedNote(title);
-                      if (
-                        typeof window !== 'undefined' &&
-                        window.innerWidth < 640
-                      ) {
-                        setIsSidebarOpen(false);
-                      }
-                    }}
+                    key={note.id}
+                    onClick={() => handleSelectNote(note)}
                     className={`noteitem group relative  h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
-                      selectedNote === title ? 'bg-secondary' : ''
+                      selectedNote?.id === note.id ? 'bg-secondary' : ''
                     }`}
                   >
                     <FileText className="h-5 w-5 mr-2 stroke-2 flex-shrink-0" />
-                    <div className="text-nowrap  overflow-hidden">{title}</div>
+                    <div className="text-nowrap  overflow-hidden">
+                      {note.title}
+                    </div>
                     <div
                       className={`shadowcover transition-all absolute bg-gradient-to-r ${
-                        selectedNote === title
+                        selectedNote?.id === note.id
                           ? 'from-transparent to-secondary'
                           : 'from-transparent to-background'
                       } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
@@ -184,7 +238,7 @@ const Dashboard = () => {
             <div className="h-fit w-full flex justify-normal items-center gap-3 relative overflow-hidden">
               <div className="bg-secondary p-3 rounded-md flex">
                 <div className="h-5 w-5 font-semibold text-[1.4rem] flex items-center justify-center">
-                  {session.user.name[0].toUpperCase()}
+                  {session?.user?.name?.[0]?.toUpperCase() || ''}
                 </div>
               </div>
               {/* add a gradient closure for overfloeing text! */}
@@ -194,10 +248,10 @@ const Dashboard = () => {
                   style={{ display: 'inline-block' }}
                 ></div>
                 <div className="font-semibold text-[1rem] w-full">
-                  {session.user.name}
+                  {session?.user?.name}
                 </div>
                 <div className="text-muted-foreground text-[0.80rem] font-semibold">
-                  {session.user.email}
+                  {session?.user?.email}
                 </div>
               </div>
             </div>
@@ -249,17 +303,31 @@ const Dashboard = () => {
               >
                 <TextAreaAutosize
                   className="w-full bg-transparent outline-none text-balance font-bold text-3xl sm:text-5xl placeholder:text-muted-foreground resize-none leading-snug"
-                  value={selectedNote || ''}
+                  value={selectedNote?.title || ''}
                   placeholder="Untitled"
                   readOnly={!canEdit}
                   minRows={1}
                   maxRows={5}
-                  onChange={(e) => setSelectedNote(e.target.value)}
+                  onChange={(e) =>
+                    setSelectedNote({
+                      ...selectedNote,
+                      title: e.target.value,
+                      id: selectedNote?.id || '',
+                      content: selectedNote?.content || '',
+                    })
+                  }
                 />
               </div>
               <div className="w-full pb-40 flex-1">
                 <Suspense fallback={<Loader />}>
-                  <Tiptap content="" editable={canEdit} />
+                  <Tiptap
+                    content={selectedNoteContent}
+                    editable={canEdit}
+                    onContentChange={(content: string) => {
+                      setSelectedNoteContent(content);
+                      setSelectedNote({ ...selectedNote!, content });
+                    }}
+                  />
                 </Suspense>
               </div>
             </div>
