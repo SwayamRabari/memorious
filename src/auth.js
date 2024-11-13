@@ -52,20 +52,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             where: { email },
           });
 
-          // If user already exists, with credentials, then return error
-          if (alreadyUser && alreadyUser.provider === 'credentials') {
-            throw new Error('User already exists with credentials');
+          if (alreadyUser) {
+            await prisma.user.update({
+              where: { email },
+              data: {
+                googleid: id,
+                provider: 'credentials, google', // Optionally update providers
+              },
+            });
+          } else {
+            await prisma.user.create({
+              data: {
+                email,
+                name,
+                googleid: id,
+                provider: 'google',
+              },
+            });
           }
-
-          await prisma.user.create({
-            data: {
-              email,
-              name,
-              googleid: id,
-              provider: 'google',
-            },
-          });
-
           return true;
         } catch (error) {
           throw new Error(error);
