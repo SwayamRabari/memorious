@@ -199,7 +199,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
       } transition-all duration-300`}
     >
       <Input
-        placeholder="Enter a prompt"
+        placeholder="Ask Gemini"
         disabled={responseLoading}
         ref={inputRef}
         value={promt}
