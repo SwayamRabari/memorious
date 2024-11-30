@@ -1,7 +1,6 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialProvider from 'next-auth/providers/credentials';
-import { CredentialsSignin } from 'next-auth';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
@@ -46,29 +45,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       if (account.provider === 'google') {
         try {
-          const { email, name, id } = user;
+          const { email, name, id: googleId } = user;
 
-          const alreadyUser = await prisma.user.findUnique({
+          const existingUser = await prisma.user.findUnique({
             where: { email },
           });
 
-          if (alreadyUser) {
+          if (existingUser) {
             await prisma.user.update({
               where: { email },
               data: {
-                googleid: id,
+                googleid: googleId,
                 provider: 'credentials, google', // Optionally update providers
               },
             });
+            user.id = existingUser.id; // Set the user id
           } else {
-            await prisma.user.create({
+            const newUser = await prisma.user.create({
               data: {
                 email,
                 name,
-                googleid: id,
+                googleid: googleId,
                 provider: 'google',
               },
             });
+            user.id = newUser.id; // Set the user id
           }
           return true;
         } catch (error) {

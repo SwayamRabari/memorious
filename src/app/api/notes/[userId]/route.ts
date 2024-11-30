@@ -18,5 +18,3 @@ export async function GET(
   });
   return NextResponse.json({ notes });
 }
-
-// ...existing code for POST, PUT, DELETE...
