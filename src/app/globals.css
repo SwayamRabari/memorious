@@ -68,6 +68,10 @@ main {
   @apply text-secondary-foreground;
 }
 
+.titlefield::-webkit-scrollbar {
+  display: none;
+}
+
 @layer base {
   * {
     @apply border-border;

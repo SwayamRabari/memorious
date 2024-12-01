@@ -75,17 +75,14 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
         body: JSON.stringify({
           prompt:
             promt +
-            '\nAdditional context: do not include main heading for the generated content.',
+            '\n\nAdditional context: do not include main heading for the generated content. \n Make answer detailed and well structured.',
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Generated successfully!', {
-          duration: 2000,
-          id: 'generate',
-        });
+        toast.dismiss('generate');
 
         const html = await marked(data.response);
         const parser = new DOMParser();
