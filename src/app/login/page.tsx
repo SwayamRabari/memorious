@@ -107,6 +107,9 @@ export default function Login() {
               <Button type="submit" className="w-full">
                 Login
               </Button>
+              <CardDescription className="font-semibold text-[14px] w-full text-center">
+                <Link href={'/reset-password'}>Forgot password? Reset it</Link>
+              </CardDescription>
             </form>
             <div className="relative my-3 w-full">
               <div className="absolute inset-0 flex items-center">
