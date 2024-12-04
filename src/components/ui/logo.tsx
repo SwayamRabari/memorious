@@ -1,9 +1,9 @@
 export default function Logo() {
   return (
     <>
-      <div className="logo text-[1.3rem] font-bold flex items-center gap-3 select-none">
+      <div className="logo text-2xl font-bold flex items-center gap-3 select-none">
         <div
-          className="h-10 bg-secondary w-10 rounded-md hidden md:flex justify-center items-center
+          className="h-10 bg-secondary w-10 rounded-md flex justify-center items-center
             "
         >
           <svg
@@ -22,7 +22,9 @@ export default function Logo() {
             />
           </svg>
         </div>
-        Memorious
+        <div className="text-2xl font-bold text-foreground hidden sm:block">
+          Memorious
+        </div>
       </div>
     </>
   );

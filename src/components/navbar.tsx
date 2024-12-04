@@ -1,9 +1,11 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import Logo from './ui/logo';
+import { ModeToggle } from '@/components/ui/themetoggle';
+
 export default function Navbar() {
   return (
-    <nav className="flex w-full items-center justify-between px-6 py-6">
-      <h1 className="text-[25px] font-bold">Memorious</h1>
+    <nav className="flex items-center justify-between px-6 py-5 border-b border-border">
+      <Logo />
       <menu className="flex gap-5 items-center">
         <Link
           className="text-[16px] font-semibold bg-background border border-border rounded-md h-10 px-4 py-2 hover:bg-accent transition-all duration-200"
@@ -19,6 +21,7 @@ export default function Navbar() {
         >
           Login
         </Link>
+        <ModeToggle />
       </menu>
     </nav>
   );

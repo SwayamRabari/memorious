@@ -162,3 +162,7 @@ pre code {
 .scrollarea::-webkit-scrollbar-thumb {
   @apply bg-secondary rounded-full;
 }
+
+main::-webkit-scrollbar {
+  display: none;
+}
