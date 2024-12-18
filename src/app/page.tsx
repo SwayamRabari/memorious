@@ -17,10 +17,10 @@ export default async function Home() {
   return (
     <main className="w-full flex flex-col justify-center m-0 p-0">
       <Navbar />
-      <div className="container px-5 max-w-full h-fit flex flex-col items-center py-10 md:py-20">
+      <div className="container px-5 max-w-full md:w-[1200px] h-fit flex flex-col items-center py-10 md:py-20">
         <div className="mb-10">
-          <div className="hero mb-3 md:mb-5 leading-tight text-[6.5vw] md:text-6xl font-extrabold w-full text-center">
-            <div className="mb-2 md:mb-3">
+          <div className="hero mb-3 md:mb-5 text-[6.5vw] md:text-6xl font-extrabold w-full text-center">
+            <div className="mb-2 md:mb-3 leading-tight">
               All You Need to Write,
               <br /> Organized in One Place.
             </div>
