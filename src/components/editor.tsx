@@ -258,9 +258,8 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
               <Strikethrough className="h-5 w-5 scale-90" />
             </Button>
             <Button
-              onClick={() =>
-                editor.chain().focus().toggleHeading({ level: 1 }).run()
-              }
+              onClick={() => editor.chain().focus().toggleCode().run()}
+              disabled={!editor.can().chain().focus().toggleCode().run()}
               variant={
                 editor.isActive('heading', { level: 1 }) ? 'secondary' : 'ghost'
               }

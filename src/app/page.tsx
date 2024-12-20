@@ -3,7 +3,14 @@ import React from 'react';
 import Navbar from '@/components/navbar';
 import Image from 'next/image';
 import { auth } from '@/auth';
-import { LetterText, ListTree, NotepadText } from 'lucide-react';
+import {
+  ArrowBigLeft,
+  ChevronRight,
+  LetterText,
+  ListTree,
+  MoveRight,
+  NotepadText,
+} from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
@@ -18,7 +25,7 @@ export default async function Home() {
     <main className="w-full flex flex-col justify-center m-0 p-0">
       <Navbar />
       <div className="container px-5 max-w-full md:w-[1200px] h-fit flex flex-col items-center py-10 md:py-20">
-        <div className="mb-10">
+        <div className="mb-5">
           <div className="hero mb-3 md:mb-5 text-[6.5vw] md:text-6xl font-extrabold w-full text-center">
             <div className="mb-2 md:mb-3 leading-tight">
               All You Need to Write,
@@ -32,15 +39,21 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="mb-10 text-[4vw] md:text-xl font-semibold bg-secondary py-2 pl-4 md:py-3 md:pl-6 rounded-full">
-          Get Started
+        <div className="flex gap-4">
+          <Link
+            href={'/dashboard?demo=true'}
+            className="flex gap-1 items-center mb-10 border-2 border-border text-[4vw] md:text-lg font-semibold py-2 px-5 rounded-lg"
+          >
+            Try Demo
+          </Link>
           <Link
             href={'/signup'}
-            className="bg-foreground text-background py-2 ml-4 px-4 md:ml-4 md:py-3 md:px-6 rounded-full border-none decoration-none"
+            className="flex gap-1 items-center mb-10 bg-secondary text-[4vw] md:text-lg font-semibold py-2 px-5 rounded-lg"
           >
-            Sign Up
+            Get Started
           </Link>
         </div>
+
         <Image
           className="mb-20 rounded-md border-2 border-secondary dark:hidden"
           src={'/memoriouslight.png'}
