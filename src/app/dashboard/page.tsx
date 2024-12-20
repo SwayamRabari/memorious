@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { ModeToggle } from '@/components/ui/themetoggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,6 @@ import {
   Save,
   LogOut,
   Trash,
-  Link,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Loader from '@/components/ui/loader';
@@ -35,10 +34,32 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from '@/components/ui/alert-dialog';
+import { useSearchParams } from 'next/navigation';
+
+const DemoInitializer = ({
+  setDemo,
+  setIsDemoInitialized,
+}: {
+  setDemo: (value: boolean) => void;
+  setIsDemoInitialized: (value: boolean) => void;
+}) => {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const demoParam = searchParams.get('demo') === 'true';
+    setDemo(demoParam);
+    setIsDemoInitialized(true);
+  }, [searchParams, setDemo, setIsDemoInitialized]);
+
+  return null;
+};
 
 const Dashboard = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  const [demo, setDemo] = useState<boolean>(false);
+  const [isDemoInitialized, setIsDemoInitialized] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
@@ -51,19 +72,25 @@ const Dashboard = () => {
     content: string;
   }
 
-  const searchParams = useSearchParams();
-  const demo: boolean = searchParams.get('demo') === 'true';
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [canEdit, setCanEdit] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [notesArray, setNotesArray] = useState<Note[]>([]);
   const [selectedNoteContent, setSelectedNoteContent] = useState<string>('');
 
+  // Redirect if not authenticated and not in demo mode
   useEffect(() => {
-    if (status === 'unauthenticated' && !demo) {
+    if (isDemoInitialized && !session && !demo) {
       router.push('/login');
     }
-  }, [status, session, router, demo]);
+  }, [session, demo, router, isDemoInitialized]);
+
+  // Fetch notes after demo state is initialized
+  useEffect(() => {
+    if ((status === 'authenticated' || demo) && isDemoInitialized) {
+      fetchNotes();
+    }
+  }, [status, demo, isDemoInitialized]);
 
   useEffect(() => {
     const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
@@ -71,12 +98,6 @@ const Dashboard = () => {
       setCanEdit(false);
     }
   }, []);
-
-  useEffect(() => {
-    if (status === 'authenticated' || demo) {
-      fetchNotes();
-    }
-  }, [status]);
 
   const handleSearchChange = useCallback(
     debounce((e) => setSearchQuery(e.target.value), 300),
@@ -250,7 +271,7 @@ const Dashboard = () => {
       console.error(error);
       toast.error('Failed to save note.');
     }
-  }, [selectedNote, notesArray, demo, session?.user?.id, hasUnsavedChanges]);
+  }, [selectedNote, demo, session?.user?.id]);
 
   const deleteNote = useCallback(() => {
     if (!selectedNote) return;
@@ -324,279 +345,280 @@ const Dashboard = () => {
     setHasUnsavedChanges(true);
   };
 
-  if (status === 'loading') {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center text-3xl font-semibold">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (!session && !demo) {
-    return null;
-  }
-
   return (
     <>
-      <div className="flex flex-col h-screen w-screen transition-colors duration-150">
-        <div className="header border-b border-border flex lg:hidden justify-between items-center w-full p-5">
-          <div className="flex gap-5">
-            <Button
-              variant={'secondary'}
-              className="h-10 w-10"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            >
-              {isSidebarOpen ? (
-                <PanelLeftClose className="h-5 w-5 flex-shrink-0" />
-              ) : (
-                <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
-              )}
-            </Button>
-          </div>
-          <div className="flex justify-center items-center gap-5">
-            <Button
-              variant={'secondary'}
-              className="h-10 w-10"
-              onClick={saveNote}
-              disabled={!hasUnsavedChanges}
-            >
-              <Save className="h-5 w-5 flex-shrink-0" />
-            </Button>
-            <Button
-              variant="destructive"
-              className="h-10 w-10"
-              onClick={deleteNote}
-              disabled={!selectedNote || selectedNote.id.startsWith('temp-')}
-            >
-              <Trash className="h-5 w-5 flex-shrink-0" />
-            </Button>
-            <Button
-              className="h-10 w-10"
-              variant={'secondary'}
-              onClick={toggleEdit}
-              disabled={!canEdit}
-            >
-              {canEdit ? (
-                <LockOpen className="h-5 w-5 flex-shrink-0" />
-              ) : (
-                <Lock className="h-5 w-5 flex-shrink-0" />
-              )}
-            </Button>
-            <ModeToggle />
-          </div>
+      <Suspense fallback={<Loader />}>
+        <DemoInitializer
+          setDemo={setDemo}
+          setIsDemoInitialized={setIsDemoInitialized}
+        />
+      </Suspense>
+
+      {(!isDemoInitialized || status === 'loading') ? (
+        <div className="h-screen w-screen flex items-center justify-center text-3xl font-semibold">
+          <Loader />
         </div>
-        <div className="flex flex-1 overflow-hidden relative">
-          <div
-            className={`sidebar absolute lg:relative h-full ${
-              isSidebarOpen ? 'w-[80%] sm:w-[18rem]' : 'w-0 border-r-0'
-            } overflow-hidden bg-background z-50 flex-shrink-0 border-r flex flex-col transition-all duration-500 text-nowrap flex-nowrap`}
-          >
-            <div className="flex flex-col gap-5 p-5 border-b border-border">
-              <div>
-                <Button
-                  variant="secondary"
-                  className="justify-start w-full text-[1rem] px-3"
-                  onClick={() => {
-                    const newNote = {
-                      id: `temp-${Date.now()}`,
-                      title: '',
-                      content: '',
-                    };
-                    setSelectedNote(newNote);
-                    if (
-                      typeof window !== 'undefined' &&
-                      window.innerWidth < 640
-                    ) {
-                      setIsSidebarOpen(false);
-                    }
-                    setCanEdit(true);
-                  }}
-                >
-                  <Plus className="h-5 w-5 mr-2 stroke-[2px] flex-shrink-0" />
-                  New Note
-                </Button>
-              </div>
-              <div>
-                <div className="h-10 rounded-md border-[1.5px] border-border px-3 flex justify-start items-center">
-                  <Search className="h-5 w-5 scale-95 mr-2 text-zinc-500 stroke-[2px] flex-shrink-0" />
-                  <div>
-                    <Input
-                      placeholder="Search"
-                      className="w-full bg-transparent p-0 text-[1rem] placeholder-secondary border-none focus:border-none focus:ring-0"
-                      onChange={handleSearchChange}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <ScrollArea className="flex-1 px-5">
-              <div className="py-5">
-                <div className="flex flex-col gap-1 cursor-pointer">
-                  {filteredNotes.map(
-                    (note, index) =>
-                      !note.id.startsWith('temp-') && (
-                        <div
-                          key={note.id || index}
-                          onClick={() => handleSelectNote(note)}
-                          className={`noteitem group relative  h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
-                            selectedNote?.id === note.id ? 'bg-secondary' : ''
-                          }`}
-                        >
-                          <FileText className="h-5 w-5 mr-2 stroke-2 flex-shrink-0" />
-                          <div className="overflow-hidden">
-                            {note.title || 'Untitled'}
-                          </div>
-                          <div
-                            className={`shadowcover transition-all absolute bg-gradient-to-r ${
-                              selectedNote?.id === note.id
-                                ? 'from-transparent to-secondary'
-                                : 'from-transparent to-background'
-                            } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
-                          ></div>
-                        </div>
-                      )
-                  )}
-                </div>
-              </div>
-            </ScrollArea>
-            <div className="border-t border-border p-5 relative flex items-center">
-              <div className="h-fit w-full flex justify-normal items-center gap-3 relative overflow-hidden">
-                <div className="bg-gradient-to-r from-transparent to-background w-7 h-full absolute right-0"></div>
-                <div className="bg-secondary p-3 rounded-md flex">
-                  <div className="h-5 w-5 font-semibold text-[1.4rem] flex items-center justify-center">
-                    {/* {session?.user?.name?.[0]?.toUpperCase() || 'D'} */}
-                    {demo ? 'D' : session?.user?.name?.[0]?.toUpperCase()}
-                  </div>
-                </div>
-                <div className="userinfo">
-                  <div className="font-semibold text-[1rem] w-full">
-                    {/* {session?.user?.name || (demo ? 'Demo User' : '')} */}
-                    {demo ? 'Demo User' : session?.user?.name}
-                  </div>
-                  <div className="text-muted-foreground text-[0.80rem] font-semibold">
-                    {/* {session?.user?.email || (demo ? 'demo@example.com' : '')} */}
-                    {demo ? 'demo@example.com' : session?.user?.email}
-                  </div>
-                </div>
-              </div>
-              <Button className="h-10 w-10 bg-background hover:bg-background text-foreground">
-                <LogOut
-                  className="h-5 w-5 flex-shrink-0"
-                  onClick={() =>
-                    signOut({
-                      callbackUrl: '/',
-                    })
-                  }
-                />
+      ) : !session && !demo ? null : (
+        <div className="flex flex-col h-screen w-screen transition-colors duration-150">
+          <div className="header border-b border-border flex lg:hidden justify-between items-center w-full p-5">
+            <div className="flex gap-5">
+              <Button
+                variant={'secondary'}
+                className="h-10 w-10"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              >
+                {isSidebarOpen ? (
+                  <PanelLeftClose className="h-5 w-5 flex-shrink-0" />
+                ) : (
+                  <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
+                )}
               </Button>
             </div>
+            <div className="flex justify-center items-center gap-5">
+              <Button
+                variant={'secondary'}
+                className="h-10 w-10"
+                onClick={saveNote}
+                disabled={!hasUnsavedChanges}
+              >
+                <Save className="h-5 w-5 flex-shrink-0" />
+              </Button>
+              <Button
+                variant="destructive"
+                className="h-10 w-10"
+                onClick={deleteNote}
+                disabled={!selectedNote || selectedNote.id.startsWith('temp-')}
+              >
+                <Trash className="h-5 w-5 flex-shrink-0" />
+              </Button>
+              <Button
+                className="h-10 w-10"
+                variant={'secondary'}
+                onClick={toggleEdit}
+                disabled={!canEdit}
+              >
+                {canEdit ? (
+                  <LockOpen className="h-5 w-5 flex-shrink-0" />
+                ) : (
+                  <Lock className="h-5 w-5 flex-shrink-0" />
+                )}
+              </Button>
+              <ModeToggle />
+            </div>
           </div>
-          <div className="mainsection w-full flex flex-col relative overflow-auto flex-shrink-0 flex-1">
-            <div className="header hidden lg:flex justify-between items-center w-full p-5">
-              <div className="flex gap-5">
-                <Button
-                  variant={'secondary'}
-                  className="h-10 w-10"
-                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                >
-                  {isSidebarOpen ? (
-                    <PanelLeftClose className="h-5 w-5 flex-shrink-0" />
-                  ) : (
-                    <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
-                  )}
-                </Button>
-                <Logo />
+          <div className="flex flex-1 overflow-hidden relative">
+            <div
+              className={`sidebar absolute lg:relative h-full ${
+                isSidebarOpen ? 'w-[80%] sm:w-[18rem]' : 'w-0 border-r-0'
+              } overflow-hidden bg-background z-50 flex-shrink-0 border-r flex flex-col transition-all duration-500 text-nowrap flex-nowrap`}
+            >
+              <div className="flex flex-col gap-5 p-5 border-b border-border">
+                <div>
+                  <Button
+                    variant="secondary"
+                    className="justify-start w-full text-[1rem] px-3"
+                    onClick={() => {
+                      const newNote = {
+                        id: `temp-${Date.now()}`,
+                        title: '',
+                        content: '',
+                      };
+                      setSelectedNote(newNote);
+                      if (
+                        typeof window !== 'undefined' &&
+                        window.innerWidth < 640
+                      ) {
+                        setIsSidebarOpen(false);
+                      }
+                      setCanEdit(true);
+                    }}
+                  >
+                    <Plus className="h-5 w-5 mr-2 stroke-[2px] flex-shrink-0" />
+                    New Note
+                  </Button>
+                </div>
+                <div>
+                  <div className="h-10 rounded-md border-[1.5px] border-border px-3 flex justify-start items-center">
+                    <Search className="h-5 w-5 scale-95 mr-2 text-zinc-500 stroke-[2px] flex-shrink-0" />
+                    <div>
+                      <Input
+                        placeholder="Search"
+                        className="w-full bg-transparent p-0 text-[1rem] placeholder-secondary border-none focus:border-none focus:ring-0"
+                        onChange={handleSearchChange}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-center items-center gap-5">
-                <Button
-                  variant={'secondary'}
-                  className="h-10 w-10"
-                  onClick={saveNote}
-                  disabled={!hasUnsavedChanges}
-                >
-                  <Save className="h-5 w-5 flex-shrink-0" />
+              <ScrollArea className="flex-1 px-5">
+                <div className="py-5">
+                  <div className="flex flex-col gap-1 cursor-pointer">
+                    {filteredNotes.map(
+                      (note, index) =>
+                        !note.id.startsWith('temp-') && (
+                          <div
+                            key={note.id || index}
+                            onClick={() => handleSelectNote(note)}
+                            className={`noteitem group relative  h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
+                              selectedNote?.id === note.id ? 'bg-secondary' : ''
+                            }`}
+                          >
+                            <FileText className="h-5 w-5 mr-2 stroke-2 flex-shrink-0" />
+                            <div className="overflow-hidden">
+                              {note.title || 'Untitled'}
+                            </div>
+                            <div
+                              className={`shadowcover transition-all absolute bg-gradient-to-r ${
+                                selectedNote?.id === note.id
+                                  ? 'from-transparent to-secondary'
+                                  : 'from-transparent to-background'
+                              } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
+                            ></div>
+                          </div>
+                        )
+                    )}
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="border-t border-border p-5 relative flex items-center">
+                <div className="h-fit w-full flex justify-normal items-center gap-3 relative overflow-hidden">
+                  <div className="bg-gradient-to-r from-transparent to-background w-7 h-full absolute right-0"></div>
+                  <div className="bg-secondary p-3 rounded-md flex">
+                    <div className="h-5 w-5 font-semibold text-[1.4rem] flex items-center justify-center">
+                      {/* {session?.user?.name?.[0]?.toUpperCase() || 'D'} */}
+                      {demo ? 'D' : session?.user?.name?.[0]?.toUpperCase()}
+                    </div>
+                  </div>
+                  <div className="userinfo">
+                    <div className="font-semibold text-[1rem] w-full">
+                      {/* {session?.user?.name || (demo ? 'Demo User' : '')} */}
+                      {demo ? 'Demo User' : session?.user?.name}
+                    </div>
+                    <div className="text-muted-foreground text-[0.80rem] font-semibold">
+                      {/* {session?.user?.email || (demo ? 'demo@example.com' : '')} */}
+                      {demo ? 'demo@example.com' : session?.user?.email}
+                    </div>
+                  </div>
+                </div>
+                <Button className="h-10 w-10 bg-background hover:bg-background text-foreground">
+                  <LogOut
+                    className="h-5 w-5 flex-shrink-0"
+                    onClick={() =>
+                      signOut({
+                        callbackUrl: '/',
+                      })
+                    }
+                  />
                 </Button>
-                <Button
-                  variant="destructive"
-                  className="h-10 w-10"
-                  onClick={deleteNote}
-                  disabled={
-                    !selectedNote || selectedNote.id.startsWith('temp-')
-                  }
-                >
-                  <Trash className="h-5 w-5 flex-shrink-0" />
-                </Button>
-                <Button
-                  className="h-10 w-10"
-                  variant={'secondary'}
-                  onClick={toggleEdit}
-                >
-                  {canEdit ? (
-                    <LockOpen className="h-5 w-5 flex-shrink-0" />
-                  ) : (
-                    <Lock className="h-5 w-5 flex-shrink-0" />
-                  )}
-                </Button>
-                <ModeToggle />
               </div>
             </div>
-            {selectedNote ? (
-              <div
-                className={`scrollarea  overflow-auto flex-1 flex transition-transform duration-500 py-16 ${
-                  isSidebarOpen ? 'opacity-30 sm:opacity-100' : 'opacity-100'
-                } justify-center`}
-              >
-                <div className="editorsection w-full md:w-[80%] lg:w-[760px] px-8">
-                  <div
-                    className="title w-full h-fit font-bold text-3xl sm:text-5xl mb-2"
-                    style={{ lineHeight: '1.2' }}
+            <div className="mainsection w-full flex flex-col relative overflow-auto flex-shrink-0 flex-1">
+              <div className="header hidden lg:flex justify-between items-center w-full p-5">
+                <div className="flex gap-5">
+                  <Button
+                    variant={'secondary'}
+                    className="h-10 w-10"
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                   >
-                    <TextAreaAutosize
-                      className="w-full bg-transparent outline-none font-bold text-3xl sm:text-5xl placeholder:text-muted-foreground resize-none"
-                      value={selectedNote?.title || ''}
-                      placeholder="Untitled"
-                      readOnly={!canEdit}
+                    {isSidebarOpen ? (
+                      <PanelLeftClose className="h-5 w-5 flex-shrink-0" />
+                    ) : (
+                      <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
+                    )}
+                  </Button>
+                  <Logo />
+                </div>
+                <div className="flex justify-center items-center gap-5">
+                  <Button
+                    variant={'secondary'}
+                    className="h-10 w-10"
+                    onClick={saveNote}
+                    disabled={!hasUnsavedChanges}
+                  >
+                    <Save className="h-5 w-5 flex-shrink-0" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="h-10 w-10"
+                    onClick={deleteNote}
+                    disabled={
+                      !selectedNote || selectedNote.id.startsWith('temp-')
+                    }
+                  >
+                    <Trash className="h-5 w-5 flex-shrink-0" />
+                  </Button>
+                  <Button
+                    className="h-10 w-10"
+                    variant={'secondary'}
+                    onClick={toggleEdit}
+                  >
+                    {canEdit ? (
+                      <LockOpen className="h-5 w-5 flex-shrink-0" />
+                    ) : (
+                      <Lock className="h-5 w-5 flex-shrink-0" />
+                    )}
+                  </Button>
+                  <ModeToggle />
+                </div>
+              </div>
+              {selectedNote ? (
+                <div
+                  className={`scrollarea  overflow-auto flex-1 flex transition-transform duration-500 py-16 ${
+                    isSidebarOpen ? 'opacity-30 sm:opacity-100' : 'opacity-100'
+                  } justify-center`}
+                >
+                  <div className="editorsection w-full md:w-[80%] lg:w-[760px] px-8">
+                    <div
+                      className="title w-full h-fit font-bold text-3xl sm:text-5xl mb-2"
                       style={{ lineHeight: '1.2' }}
-                      onChange={handleTitleChange}
-                    />
-                  </div>
-                  <div className="w-full pb-40 flex-1">
-                    <Suspense fallback={<Loader />}>
-                      <Tiptap
-                        content={selectedNoteContent}
-                        editable={canEdit}
-                        onContentChange={(content: string) => {
-                          setSelectedNoteContent(content);
-                          setSelectedNote({ ...selectedNote!, content });
-                          setHasUnsavedChanges(true);
-                        }}
+                    >
+                      <TextAreaAutosize
+                        className="w-full bg-transparent outline-none font-bold text-3xl sm:text-5xl placeholder:text-muted-foreground resize-none"
+                        value={selectedNote?.title || ''}
+                        placeholder="Untitled"
+                        readOnly={!canEdit}
+                        style={{ lineHeight: '1.2' }}
+                        onChange={handleTitleChange}
                       />
-                    </Suspense>
+                    </div>
+                    <div className="w-full pb-40 flex-1">
+                      <Suspense fallback={<Loader />}>
+                        <Tiptap
+                          content={selectedNoteContent}
+                          editable={canEdit}
+                          onContentChange={(content: string) => {
+                            setSelectedNoteContent(content);
+                            setSelectedNote({ ...selectedNote!, content });
+                            setHasUnsavedChanges(true);
+                          }}
+                        />
+                      </Suspense>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="h-full w-full flex items-center justify-center">
-                <div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="100"
-                    height="171"
-                    viewBox="0 0 100 171"
-                    fill="none"
-                    style={{ height: '50%' }}
-                  >
-                    <path
-                      d="M100 0H0V171L50 143L100 171V0Z"
-                      className="fill-secondary"
-                    />
-                  </svg>
+              ) : (
+                <div className="h-full w-full flex items-center justify-center">
+                  <div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="100"
+                      height="171"
+                      viewBox="0 0 100 171"
+                      fill="none"
+                      style={{ height: '50%' }}
+                    >
+                      <path
+                        d="M100 0H0V171L50 143L100 171V0Z"
+                        className="fill-secondary"
+                      />
+                    </svg>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
       <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -607,7 +629,7 @@ const Dashboard = () => {
           </AlertDialogDescription>
           <AlertDialogFooter>
             <Button variant="outline" onClick={handleDiscardChanges}>
-              Don't Save
+              {`Don't Save`}
             </Button>
             <Button variant="secondary" onClick={handleSaveChanges}>
               Save
