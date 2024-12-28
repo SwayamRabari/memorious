@@ -17,7 +17,7 @@ export default async function Home() {
   return (
     <main className="w-full flex flex-col justify-center m-0 p-0">
       <Navbar />
-      <div className="container px-5 max-w-full h-fit flex flex-col items-center py-10 md:py-20">
+      <div className="container max-w-[1200px] h-fit flex flex-col items-center py-10 md:py-20">
         <div className="mb-10">
           <div className="hero mb-3 md:mb-5 leading-tight text-[6.5vw] md:text-6xl font-extrabold w-full text-center">
             <div className="mb-2 md:mb-3">
@@ -31,7 +31,6 @@ export default async function Home() {
             </div>
           </div>
         </div>
-
         <div className="mb-10 text-[4vw] md:text-xl font-semibold bg-secondary py-2 pl-4 md:py-3 md:pl-6 rounded-full">
           Get Started
           <Link
