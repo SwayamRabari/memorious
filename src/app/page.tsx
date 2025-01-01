@@ -17,8 +17,8 @@ export default async function Home() {
   return (
     <main className="w-full flex flex-col justify-center m-0 p-0">
       <Navbar />
-      <div className="container max-w-[1200px] h-fit flex flex-col items-center py-10 md:py-20">
-        <div className="mb-10">
+      <div className="container max-w-[1200px] h-fit flex flex-col items-center pt-40 py-10 md:py-20 md:pt-44">
+        <div className="mb-5">
           <div className="hero mb-3 md:mb-5 leading-tight text-[6.5vw] md:text-6xl font-extrabold w-full text-center">
             <div className="mb-2 md:mb-3">
               All You Need to Write,
@@ -31,11 +31,16 @@ export default async function Home() {
             </div>
           </div>
         </div>
-        <div className="mb-10 text-[4vw] md:text-xl font-semibold bg-secondary py-2 pl-4 md:py-3 md:pl-6 rounded-full">
-          Get Started
+        <div className="rootnav flex gap-5 mb-10 font-semibold text-[4vw] md:text-base items-center">
           <Link
-            href={'/signup'}
-            className="bg-foreground text-background py-2 ml-4 px-4 md:ml-4 md:py-3 md:px-6 rounded-full border-none decoration-none"
+            href="/demopage"
+            className="border-2 border-secondary py-1 px-3 md:py-2 md:px-5 rounded-md"
+          >
+            Try Demo
+          </Link>
+          <Link
+            href="/login"
+            className="border-2 border-secondary bg-secondary rounded-md py-1 px-3 md:py-2 md:px-5"
           >
             Sign Up
           </Link>
@@ -51,11 +56,11 @@ export default async function Home() {
           className="mb-16 md:mb-24 rounded-md border-2 border-secondary hidden dark:block"
           src={'/memoriousdark.png'}
           alt=""
-          width={1000}
+          width={1100}
           height={500}
         />
         <div className="gemini flex flex-col items-center justify-center">
-          <div className="title w-full text-center text-[6vw] md:text-4xl font-extrabold mb-5 md:mb-10">
+          <div className="title w-full text-center text-[6vw] md:text-4xl font-bold mb-5 md:mb-10">
             Integrated Gemini
           </div>
           <Image
@@ -74,7 +79,7 @@ export default async function Home() {
         <div className="features w-full flex flex-col md:flex-row gap-14 md:gap-x-24 md:gap-y-20 items-start">
           <div className="feature flex flex-col gap-4">
             <div className="icon text-foreground bg-secondary h-fit w-fit p-4 rounded-lg">
-              <NotepadText className="size-[8vw] md:size-14" />
+              <NotepadText className="size-[8vw] md:size-12" />
             </div>
             <div>
               <div className="title text-[5vw] md:text-xl font-bold mb-1">
@@ -88,7 +93,7 @@ export default async function Home() {
           </div>
           <div className="feature flex flex-col gap-6">
             <div className="icon text-foreground bg-secondary h-fit w-fit p-4 rounded-lg">
-              <LetterText className="size-[8vw] md:size-14" />
+              <LetterText className="size-[8vw] md:size-12" />
             </div>
             <div>
               <div className="title text-[5vw] md:text-xl font-bold mb-1">
@@ -103,7 +108,7 @@ export default async function Home() {
           </div>
           <div className="feature flex flex-col gap-6">
             <div className="icon text-foreground bg-secondary h-fit w-fit p-4 rounded-lg">
-              <ListTree className="size-[8vw] md:size-14" />
+              <ListTree className="size-[8vw] md:size-12" />
             </div>
             <div>
               <div className="text-[5vw] md:text-lg text-xl font-bold mb-1">

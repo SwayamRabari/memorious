@@ -30,6 +30,7 @@ import ListItem from '@tiptap/extension-list-item';
 import { BubbleMenu as BubbleMenuExtension } from '@tiptap/extension-bubble-menu';
 import { useState, useRef, useEffect } from 'react';
 import { Input } from './ui/input';
+import Preference from './preference';
 
 interface TiptapProps {
   content: string;
@@ -42,6 +43,10 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
   const [responseLoading, setResponseLoading] = useState<boolean>(false);
   const [showPromptInput, setShowPromptInput] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [lengthValue, setLengthValue] = useState([50]);
+  const [lengthLabel, setLengthLabel] = useState('Medium');
+  const [structure, setStructure] = useState('normal');
+  const [tone, setTone] = useState('neutral');
 
   useEffect(() => {
     if (showPromptInput && inputRef.current) {
@@ -73,9 +78,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt:
-            promt +
-            '\n\nAdditional context: do not include main heading for the generated content. \n Make answer detailed and well structured.',
+          prompt: `Write a note about: ${promt}. Make sure the note has a ${structure} structure, is a ${lengthLabel} piece of writing, and uses a ${tone} tone. Do not repeat heading in start directly start with the note.`,
         }),
       });
 
@@ -83,6 +86,11 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
 
       if (response.ok) {
         toast.dismiss('generate');
+
+        setLengthValue([50]);
+        setLengthLabel('Medium');
+        setStructure('normal');
+        setTone('neutral');
 
         const html = await marked(data.response);
         const parser = new DOMParser();
@@ -171,7 +179,10 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
       Placeholder.configure({ placeholder: 'Start typing...' }),
       ListItem,
       BubbleMenuExtension.configure({
-        element: document.querySelector('.bubble-menu') as HTMLElement,
+        element:
+          typeof document !== 'undefined'
+            ? (document.querySelector('.bubble-menu') as HTMLElement)
+            : null,
       }),
     ],
     editable: editable,
@@ -189,30 +200,44 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
   }, [content, editor]);
 
   const promptInput = (
-    <form
-      onSubmit={handlePromptSubmit}
-      className={`input flex relative bg-secondary z-10 rounded-md overflow-hidden ${
+    <div
+      className={`input flex gap-2 relative z-10 rounded-md overflow-hidden ${
         showPromptInput ? 'h-10 mb-2' : 'h-0 mb-0 opacity-0'
       } transition-all duration-300`}
     >
-      <Input
-        placeholder="Ask Gemini"
-        disabled={responseLoading}
-        ref={inputRef}
-        value={promt}
-        onChange={(e) => setPrompt(e.target.value)}
-        className="font-medium border-0 h-10 focus:ring-0 bg-transparent transition-all duration-300"
-      />
-      <button
-        type="submit"
-        className={`h-10 w-10 flex justify-center items-center rounded-md right-0 ${
-          responseLoading ? 'text-muted-foreground' : 'text-foreground'
-        } transition-all duration-300`}
-        disabled={responseLoading}
+      <form
+        onSubmit={handlePromptSubmit}
+        className="propmtfield h-auto flex bg-secondary rounded-md justify-between items-center w-full"
       >
-        <Forward className="h-5 w-5" />
-      </button>
-    </form>
+        <Input
+          placeholder="Ask Gemini"
+          disabled={responseLoading}
+          ref={inputRef}
+          value={promt}
+          onChange={(e) => setPrompt(e.target.value)}
+          className="font-medium bg-transparent border-none focus:ring-0 h-fit transition-all duration-300 w-full"
+        />
+        <Preference
+          responseLoading={responseLoading}
+          lengthValue={lengthValue}
+          setLengthValue={setLengthValue}
+          lengthLabel={lengthLabel}
+          setLengthLabel={setLengthLabel}
+          structure={structure}
+          setStructure={setStructure}
+          tone={tone}
+          setTone={setTone}
+        />
+        <Button
+          type="submit"
+          variant={'secondary'}
+          className="h-fit w-fit p-2 pr-3 flex justify-center items-center rounded-md right-0 transition-all duration-300"
+          disabled={responseLoading}
+        >
+          <Forward className="h-5 w-5 scale-110" />
+        </Button>
+      </form>
+    </div>
   );
 
   return (

@@ -9,6 +9,7 @@ import { EyeOpenIcon, EyeNoneIcon } from '@radix-ui/react-icons';
 import GoogleIcon from '@/components/icons/google';
 import { ModeToggle } from '@/components/ui/themetoggle';
 import { googleLogin } from '@/actions/googleLogin';
+import { signIn } from 'next-auth/react';
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 
 import {
@@ -93,7 +94,12 @@ export default function SignUp() {
 
       if (response.ok) {
         toast.success('Account created successfully!', { id: toastId });
-        router.push('/login');
+        await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        });
+        router.push('/dashboard');
       } else {
         const data = await response.json();
         toast.error(data.error, { id: toastId });
