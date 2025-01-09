@@ -41,6 +41,10 @@ interface TiptapProps {
 }
 
 const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
+  const [lengthValue, setLengthValue] = useState<number[]>([50]);
+  const [lengthLabel, setLengthLabel] = useState<string>('Medium');
+  const [structure, setStructure] = useState<string>('normal');
+  const [tone, setTone] = useState<string>('normal');
   const [promt, setPrompt] = useState<string>('');
   const [responseLoading, setResponseLoading] = useState<boolean>(false);
   const [showPromptInput, setShowPromptInput] = useState<boolean>(false);
@@ -213,7 +217,18 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
           onChange={(e) => setPrompt(e.target.value)}
           className="font-medium bg-transparent border-none focus:ring-0 h-fit transition-all duration-300 w-full"
         />
-        <Preference responseLoading={responseLoading} />
+        <Preference
+          responseLoading={responseLoading}
+          lengthValue={lengthValue}
+          setLengthValue={setLengthValue}
+          lengthLabel={lengthLabel}
+          setLengthLabel={setLengthLabel}
+          structure={structure}
+          setStructure={setStructure}
+          tone={tone}
+          setTone={setTone}
+        />
+
         <Button
           type="submit"
           variant={'secondary'}
