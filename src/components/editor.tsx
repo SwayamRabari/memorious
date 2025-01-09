@@ -9,6 +9,7 @@ import { Separator } from './ui/separator';
 import CodeBlock from './icons/codeblock';
 import { marked } from 'marked';
 import { toast } from 'sonner';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import {
   Bold,
   Italic,
@@ -23,6 +24,7 @@ import {
   Undo,
   Redo,
   Forward,
+  Settings2,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import Star from './icons/star';
@@ -43,10 +45,6 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
   const [responseLoading, setResponseLoading] = useState<boolean>(false);
   const [showPromptInput, setShowPromptInput] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [lengthValue, setLengthValue] = useState([50]);
-  const [lengthLabel, setLengthLabel] = useState('Medium');
-  const [structure, setStructure] = useState('normal');
-  const [tone, setTone] = useState('neutral');
 
   useEffect(() => {
     if (showPromptInput && inputRef.current) {
@@ -78,7 +76,9 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: `Write a note about: ${promt}. Make sure the note has a ${structure} structure, is a ${lengthLabel} piece of writing, and uses a ${tone} tone. Do not repeat heading in start directly start with the note.`,
+          prompt:
+            promt +
+            '\n\nAdditional context: do not include main heading for the generated content. \n Make answer detailed and well structured.',
         }),
       });
 
@@ -86,11 +86,6 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
 
       if (response.ok) {
         toast.dismiss('generate');
-
-        setLengthValue([50]);
-        setLengthLabel('Medium');
-        setStructure('normal');
-        setTone('neutral');
 
         const html = await marked(data.response);
         const parser = new DOMParser();
@@ -201,6 +196,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
 
   const promptInput = (
     <div
+      onSubmit={handlePromptSubmit}
       className={`input flex gap-2 relative z-10 rounded-md overflow-hidden ${
         showPromptInput ? 'h-10 mb-2' : 'h-0 mb-0 opacity-0'
       } transition-all duration-300`}
@@ -217,17 +213,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
           onChange={(e) => setPrompt(e.target.value)}
           className="font-medium bg-transparent border-none focus:ring-0 h-fit transition-all duration-300 w-full"
         />
-        <Preference
-          responseLoading={responseLoading}
-          lengthValue={lengthValue}
-          setLengthValue={setLengthValue}
-          lengthLabel={lengthLabel}
-          setLengthLabel={setLengthLabel}
-          structure={structure}
-          setStructure={setStructure}
-          tone={tone}
-          setTone={setTone}
-        />
+        <Preference responseLoading={responseLoading} />
         <Button
           type="submit"
           variant={'secondary'}
