@@ -51,7 +51,7 @@ export default function Preference({
     setLengthValue([50]);
     setLengthLabel('Medium');
     setStructure('normal');
-    setTone('neutral');
+    setTone('normal');
   }
 
   return (
@@ -101,13 +101,14 @@ export default function Preference({
             name="tone"
             value={tone}
             onValueChange={(val) => setTone(val)}
+            defaultValue="normal"
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Tone" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="neutral">Neutral</SelectItem>
+                <SelectItem value="normal">Normal</SelectItem>
                 <SelectItem value="formal">Formal</SelectItem>
                 <SelectItem value="concise">Concise</SelectItem>
                 <SelectItem value="descriptive">Descriptive</SelectItem>

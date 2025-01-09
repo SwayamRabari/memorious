@@ -369,12 +369,22 @@ const Dashboard = () => {
                   variant="secondary"
                   className="justify-start w-full text-[1rem] px-3"
                   onClick={() => {
-                    const newNote = {
-                      id: `temp-${Date.now()}`, // Assign a temporary unique ID
+                    if (hasUnsavedChanges) {
+                      setNextNoteToSelect({
+                        id: `temp-${Date.now()}`,
+                        title: '',
+                        content: '',
+                      });
+                      setIsAlertDialogOpen(true);
+                      return;
+                    }
+
+                    setSelectedNote({
+                      id: `temp-${Date.now()}`,
                       title: '',
                       content: '',
-                    };
-                    setSelectedNote(newNote);
+                    });
+
                     if (
                       typeof window !== 'undefined' &&
                       window.innerWidth < 640
@@ -603,7 +613,7 @@ const Dashboard = () => {
           </AlertDialogDescription>
           <AlertDialogFooter>
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
               Cancel
