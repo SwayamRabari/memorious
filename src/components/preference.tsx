@@ -51,7 +51,7 @@ export default function Preference({
     setLengthValue([50]);
     setLengthLabel('Medium');
     setStructure('normal');
-    setTone('neutral');
+    setTone('normal');
   }
 
   return (
