@@ -9,7 +9,7 @@ import { Separator } from './ui/separator';
 import CodeBlock from './icons/codeblock';
 import { marked } from 'marked';
 import { toast } from 'sonner';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import {
   Bold,
   Italic,
@@ -72,6 +72,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
     toast.loading('Generating...', {
       id: 'generate',
     });
+    ``;
 
     try {
       const response = await fetch('/api/gemini', {
@@ -200,7 +201,6 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
 
   const promptInput = (
     <div
-      onSubmit={handlePromptSubmit}
       className={`input flex gap-2 relative z-10 rounded-md overflow-hidden ${
         showPromptInput ? 'h-10 mb-2' : 'h-0 mb-0 opacity-0'
       } transition-all duration-300`}
@@ -240,7 +240,6 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
       </form>
     </div>
   );
-
   return (
     <div spellCheck="false" className="w-full">
       {editor && (
