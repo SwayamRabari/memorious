@@ -76,7 +76,7 @@ const Dashboard = () => {
 
   const handleSearchChange = useCallback(
     debounce((e) => setSearchQuery(e.target.value), 300),
-    []
+    [],
   );
 
   const filteredNotes = useMemo(() => {
@@ -177,8 +177,8 @@ const Dashboard = () => {
         const data = await response.json();
         setNotesArray(
           notesArray.map((note) =>
-            note.id === data.note.id ? data.note : note
-          )
+            note.id === data.note.id ? data.note : note,
+          ),
         );
         setHasUnsavedChanges(false);
         toast.dismiss('save-note');
@@ -436,7 +436,7 @@ const Dashboard = () => {
                             } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
                           ></div>
                         </div>
-                      )
+                      ),
                   )}
                 </div>
               </div>
