@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
@@ -69,11 +70,20 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
     }
 
     setResponseLoading(true);
-    toast.loading('Generating...', {
-      id: 'generate',
-    });
-    ``;
-
+    toast.loading(
+      <div className="flex items-center gap-1.5 -ml-1.5">
+        <img
+          src="/gemini.svg"
+          alt=""
+          className="h-6 w-6 animate-spin"
+          style={{ animationDuration: '1.8s' }}
+        />
+        <div className=" font-semibold">Generating...</div>
+      </div>,
+      {
+        id: 'generate',
+      },
+    );
     try {
       const response = await fetch('/api/gemini', {
         method: 'POST',
@@ -112,7 +122,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
         }
 
         const fragment = ProseMirrorDOMParser.fromSchema(
-          editor.view.state.schema
+          editor.view.state.schema,
         ).parse(doc.body);
 
         const { tr, selection } = editor.view.state;
@@ -125,7 +135,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
           transaction = tr
             .insert(
               selection.from,
-              editor.view.state.schema.nodes.hard_break.create()
+              editor.view.state.schema.nodes.hard_break.create(),
             )
             .replaceSelectionWith(fragment)
             .scrollIntoView();
