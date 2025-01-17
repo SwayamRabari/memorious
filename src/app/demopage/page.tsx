@@ -60,7 +60,7 @@ const DemoPage = () => {
 
   const handleSearchChange = useCallback(
     debounce((e) => setSearchQuery(e.target.value), 300),
-    []
+    [],
   );
 
   const filteredNotes = useMemo(() => {
@@ -121,8 +121,8 @@ const DemoPage = () => {
       } else {
         setNotesArray(
           notesArray.map((note) =>
-            note.id === selectedNote.id ? selectedNote : note
-          )
+            note.id === selectedNote.id ? selectedNote : note,
+          ),
         );
       }
       setHasUnsavedChanges(false);
@@ -163,10 +163,14 @@ const DemoPage = () => {
           deleteNote();
         }
       }
+      if ((event.ctrlKey || event.metaKey) && event.key === '\\') {
+        event.preventDefault();
+        setIsSidebarOpen(!isSidebarOpen);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [saveNote, deleteNote, hasUnsavedChanges, selectedNote]);
+  }, [saveNote, deleteNote, hasUnsavedChanges, selectedNote, isSidebarOpen]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -291,7 +295,7 @@ const DemoPage = () => {
                         <FileText className="h-5 w-5 mr-2 flex-shrink-0" />
                         {note.title || 'Untitled'}
                       </div>
-                    ) : null
+                    ) : null,
                   )}
                 </div>
               </div>

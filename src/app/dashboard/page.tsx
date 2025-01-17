@@ -263,6 +263,10 @@ const Dashboard = () => {
           deleteNote();
         }
       }
+      if ((event.ctrlKey || event.metaKey) && event.key === '\\') {
+        event.preventDefault();
+        setIsSidebarOpen(!isSidebarOpen);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
