@@ -53,10 +53,10 @@ export default async function Home() {
           height={500}
         />
         <Image
-          className="mb-16 md:mb-24 rounded-md border-2 border-secondary hidden dark:block"
+          className="mb-20 md:mb-24 rounded-md border-2 border-secondary hidden dark:block"
           src={'/memoriousdark.png'}
           alt=""
-          width={1100}
+          width={1000}
           height={500}
         />
         <div className="gemini flex flex-col items-center justify-center">
