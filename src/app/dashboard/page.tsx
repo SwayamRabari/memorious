@@ -274,7 +274,7 @@ const Dashboard = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [saveNote, deleteNote, hasUnsavedChanges, selectedNote]);
+  }, [saveNote, deleteNote, hasUnsavedChanges, selectedNote, isSidebarOpen]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
