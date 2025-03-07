@@ -10,7 +10,8 @@ import { Separator } from './ui/separator';
 import CodeBlock from './icons/codeblock';
 import { marked } from 'marked';
 import { toast } from 'sonner';
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
+import { useEditorStore } from '@/lib/stores/editorStore';
+import { useNoteStore } from '@/lib/stores/noteStore';
 import {
   Bold,
   Italic,
@@ -31,7 +32,7 @@ import { Button } from './ui/button';
 import Star from './icons/star';
 import ListItem from '@tiptap/extension-list-item';
 import { BubbleMenu as BubbleMenuExtension } from '@tiptap/extension-bubble-menu';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, use } from 'react';
 import { Input } from './ui/input';
 import Preference from './preference';
 
@@ -42,13 +43,24 @@ interface TiptapProps {
 }
 
 const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
-  const [lengthValue, setLengthValue] = useState<number[]>([50]);
-  const [lengthLabel, setLengthLabel] = useState<string>('Medium');
-  const [structure, setStructure] = useState<string>('normal');
-  const [tone, setTone] = useState<string>('normal');
-  const [promt, setPrompt] = useState<string>('');
-  const [responseLoading, setResponseLoading] = useState<boolean>(false);
-  const [showPromptInput, setShowPromptInput] = useState<boolean>(false);
+  const {
+    prompt,
+    setPrompt,
+    responseLoading,
+    setResponseLoading,
+    showPromptInput,
+    togglePromptInput,
+    lengthValue,
+    setLengthValue,
+    lengthLabel,
+    setLengthLabel,
+    structure,
+    setStructure,
+    tone,
+    setTone,
+  } = useEditorStore();
+
+  const { hasUnsavedChanges, setHasUnsavedChanges } = useNoteStore();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -62,28 +74,15 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
   const handlePromptSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!promt) {
-      toast.error('Prompt cannot be empty.', {
-        id: 'generate',
-      });
+    if (!prompt) {
+      toast.error('Prompt cannot be empty.', { id: 'generate' });
       return;
     }
 
     setResponseLoading(true);
-    toast.loading(
-      <div className="flex items-center gap-1.5 -ml-1.5">
-        <img
-          src="/gemini.svg"
-          alt=""
-          className="h-6 w-6 animate-spin"
-          style={{ animationDuration: '1.8s' }}
-        />
-        <div className=" font-semibold">Generating...</div>
-      </div>,
-      {
-        id: 'generate',
-      },
-    );
+    toast.loading('Generating...', {
+      id: 'generate',
+    });
     try {
       const response = await fetch('/api/gemini', {
         method: 'POST',
@@ -92,7 +91,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
         },
         body: JSON.stringify({
           prompt:
-            promt +
+            prompt +
             '\n\nAdditional context: do not include main heading for the generated content. \n Make answer detailed and well structured.',
         }),
       });
@@ -199,7 +198,10 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
     content: content || '',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      onContentChange && onContentChange(html);
+      if (onContentChange) {
+        onContentChange(html);
+        setHasUnsavedChanges(true);
+      }
     },
   });
 
@@ -223,7 +225,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
           placeholder="Ask Gemini"
           disabled={responseLoading}
           ref={inputRef}
-          value={promt}
+          value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           className="font-medium bg-transparent border-none focus:ring-0 h-fit transition-all duration-300 w-full"
         />
@@ -308,162 +310,178 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
       )}
       <div v-if={editor}>
         {editor && (
-          <div className="w-full absolute bottom-0 hidden sm:flex flex-col justify-center items-center py-3 left-0 z-10">
+          <div
+            className={`w-full absolute bottom-0 left-0 flex flex-col justify-center items-center py-3 ${editable ? 'bg-background' : 'bg-transparent h-0 overflow-hidden'} z-10 overflow-auto`}
+          >
             <div
-              className={`w-fit ${
+              className={`bg-background w-fit ${
                 editable ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              } border-[1.5px] border-border rounded-xl bg-background p-2 transition-all duration-300`}
+              } border-[1.5px] border-border rounded-xl bg-background p-2`}
             >
               {promptInput}
-              <div className="toolbar w-fit flex items-center gap-2 flex-shrink-0 z-20">
-                <Button
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  disabled={!editor.can().chain().focus().toggleBold().run()}
-                  variant={editor.isActive('bold') ? 'secondary' : 'ghost'}
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Bold className="h-5 w-5 scale-[.85]" />
-                </Button>
-                <Button
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  disabled={!editor.can().chain().focus().toggleItalic().run()}
-                  variant={editor.isActive('italic') ? 'secondary' : 'ghost'}
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Italic className="h-5 w-5 scale-[.85]" />
-                </Button>
-                <Button
-                  onClick={() => editor.chain().focus().toggleUnderline().run()}
-                  disabled={
-                    !editor.can().chain().focus().toggleUnderline().run()
-                  }
-                  variant={editor.isActive('underline') ? 'secondary' : 'ghost'}
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <UnderlineIcon className="h-5 w-5 scale-[.85]" />
-                </Button>
-                <Button
-                  onClick={() => editor.chain().focus().toggleStrike().run()}
-                  disabled={!editor.can().chain().focus().toggleStrike().run()}
-                  variant={editor.isActive('strike') ? 'secondary' : 'ghost'}
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Strikethrough className="h-5 w-5 scale-[.85]" />
-                </Button>
-                <Separator orientation="vertical" className="h-7" />
-                <Button
-                  onClick={() =>
-                    editor.chain().focus().toggleHeading({ level: 1 }).run()
-                  }
-                  variant={
-                    editor.isActive('heading', { level: 1 })
-                      ? 'secondary'
-                      : 'ghost'
-                  }
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Heading1 className="h-5 w-5" />
-                </Button>
-                <Button
-                  onClick={() =>
-                    editor.chain().focus().toggleHeading({ level: 2 }).run()
-                  }
-                  variant={
-                    editor.isActive('heading', { level: 2 })
-                      ? 'secondary'
-                      : 'ghost'
-                  }
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Heading2 className="h-5 w-5" />
-                </Button>
-                <Button
-                  onClick={() =>
-                    editor.chain().focus().toggleHeading({ level: 3 }).run()
-                  }
-                  variant={
-                    editor.isActive('heading', { level: 3 })
-                      ? 'secondary'
-                      : 'ghost'
-                  }
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Heading3 className="h-5 w-5" />
-                </Button>
+              <div className="overflow-x-auto max-w-[90vw] scrollbar-hide">
+                <div className="toolbar w-max flex items-center gap-2 flex-shrink-0 z-20">
+                  <Button
+                    onClick={() => editor.chain().focus().toggleBold().run()}
+                    disabled={!editor.can().chain().focus().toggleBold().run()}
+                    variant={editor.isActive('bold') ? 'secondary' : 'ghost'}
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Bold className="h-5 w-5 scale-90" />
+                  </Button>
+                  <Button
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                    disabled={
+                      !editor.can().chain().focus().toggleItalic().run()
+                    }
+                    variant={editor.isActive('italic') ? 'secondary' : 'ghost'}
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Italic className="h-5 w-5 scale-90" />
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      editor.chain().focus().toggleUnderline().run()
+                    }
+                    disabled={
+                      !editor.can().chain().focus().toggleUnderline().run()
+                    }
+                    variant={
+                      editor.isActive('underline') ? 'secondary' : 'ghost'
+                    }
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <UnderlineIcon className="h-5 w-5 scale-90" />
+                  </Button>
+                  <Button
+                    onClick={() => editor.chain().focus().toggleStrike().run()}
+                    disabled={
+                      !editor.can().chain().focus().toggleStrike().run()
+                    }
+                    variant={editor.isActive('strike') ? 'secondary' : 'ghost'}
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Strikethrough className="h-5 w-5 scale-90" />
+                  </Button>
+                  <Separator orientation="vertical" className="h-7" />
+                  <Button
+                    onClick={() =>
+                      editor.chain().focus().toggleHeading({ level: 1 }).run()
+                    }
+                    variant={
+                      editor.isActive('heading', { level: 1 })
+                        ? 'secondary'
+                        : 'ghost'
+                    }
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Heading1 className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      editor.chain().focus().toggleHeading({ level: 2 }).run()
+                    }
+                    variant={
+                      editor.isActive('heading', { level: 2 })
+                        ? 'secondary'
+                        : 'ghost'
+                    }
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Heading2 className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      editor.chain().focus().toggleHeading({ level: 3 }).run()
+                    }
+                    variant={
+                      editor.isActive('heading', { level: 3 })
+                        ? 'secondary'
+                        : 'ghost'
+                    }
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Heading3 className="h-5 w-5" />
+                  </Button>
 
-                <Separator orientation="vertical" className="h-7" />
-                <Button
-                  onClick={() =>
-                    editor.chain().focus().toggleOrderedList().run()
-                  }
-                  variant={
-                    editor.isActive('orderedList') ? 'secondary' : 'ghost'
-                  }
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <ListOrdered className="h-5 w-5" />
-                </Button>
-                <Button
-                  onClick={() =>
-                    editor.chain().focus().toggleBulletList().run()
-                  }
-                  variant={
-                    editor.isActive('bulletList') ? 'secondary' : 'ghost'
-                  }
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <List className="h-5 w-5" />
-                </Button>
-                <Separator orientation="vertical" className="h-7" />
-                <Button
-                  onClick={() => editor.chain().focus().toggleCode().run()}
-                  disabled={!editor.can().chain().focus().toggleCode().run()}
-                  variant={editor.isActive('code') ? 'secondary' : 'ghost'}
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Code className="h-5 w-5" />
-                </Button>
-                <Button
-                  onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                  variant={editor.isActive('codeBlock') ? 'secondary' : 'ghost'}
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <CodeBlock />
-                </Button>
-                <Separator orientation="vertical" className="h-7" />
-                {/* undo and redo */}
-                <Button
-                  onClick={() => editor.chain().focus().undo().run()}
-                  disabled={!editor.can().chain().focus().undo().run()}
-                  variant="ghost"
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Undo className="h-5 w-5" />
-                </Button>
-                {/* redo */}
-                <Button
-                  onClick={() => editor.chain().focus().redo().run()}
-                  disabled={!editor.can().chain().focus().redo().run()}
-                  variant="ghost"
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                >
-                  <Redo className="h-5 w-5" />
-                </Button>
-                <Button
-                  className="h-fit w-fit flex items-center justify-center p-2"
-                  style={{
-                    background:
-                      'linear-gradient(310deg, #1A9CDC -16.15%, #8C65BA 70.75%)',
-                  }}
-                  onClick={() => {
-                    setShowPromptInput(!showPromptInput);
-                    setPrompt('');
-                  }}
-                >
-                  <Star
-                    className={`${showPromptInput ? 'rotate-90' : 'rotate-0'}`}
-                  />
-                </Button>
+                  <Separator orientation="vertical" className="h-7" />
+                  <Button
+                    onClick={() =>
+                      editor.chain().focus().toggleOrderedList().run()
+                    }
+                    variant={
+                      editor.isActive('orderedList') ? 'secondary' : 'ghost'
+                    }
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <ListOrdered className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      editor.chain().focus().toggleBulletList().run()
+                    }
+                    variant={
+                      editor.isActive('bulletList') ? 'secondary' : 'ghost'
+                    }
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <List className="h-5 w-5" />
+                  </Button>
+                  <Separator orientation="vertical" className="h-7" />
+                  <Button
+                    onClick={() => editor.chain().focus().toggleCode().run()}
+                    disabled={!editor.can().chain().focus().toggleCode().run()}
+                    variant={editor.isActive('code') ? 'secondary' : 'ghost'}
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Code className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      editor.chain().focus().toggleCodeBlock().run()
+                    }
+                    variant={
+                      editor.isActive('codeBlock') ? 'secondary' : 'ghost'
+                    }
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <CodeBlock />
+                  </Button>
+                  <Separator orientation="vertical" className="h-7" />
+                  {/* undo and redo */}
+                  <Button
+                    onClick={() => editor.chain().focus().undo().run()}
+                    disabled={!editor.can().chain().focus().undo().run()}
+                    variant="ghost"
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Undo className="h-5 w-5" />
+                  </Button>
+                  {/* redo */}
+                  <Button
+                    onClick={() => editor.chain().focus().redo().run()}
+                    disabled={!editor.can().chain().focus().redo().run()}
+                    variant="ghost"
+                    className="h-fit w-fit flex items-center justify-center p-2"
+                  >
+                    <Redo className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    className="h-fit w-fit sticky right-0 flex items-center justify-center p-2"
+                    style={{
+                      background:
+                        'linear-gradient(310deg, #1A9CDC -16.15%, #8C65BA 70.75%)',
+                    }}
+                    onClick={() => {
+                      togglePromptInput();
+                      setPrompt('');
+                    }}
+                  >
+                    <Star
+                      className={`${showPromptInput ? 'rotate-90' : 'rotate-0'} h-5 w-5`}
+                    />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
