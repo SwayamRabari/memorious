@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -82,7 +82,7 @@ main {
 }
 
 .tiptap {
-  @apply text-secondary-foreground w-full caret-secondary-foreground;
+  @apply text-secondary-foreground w-full caret-foreground flex flex-col gap-4;
 }
 
 .tiptap p.is-editor-empty:first-child::before {
@@ -125,7 +125,7 @@ ol {
   padding: 0.25em 0; /* Add padding to create spacing around the text */
 }
 
-pre {
+/* pre {
   @apply dark:bg-zinc-900 border-[1.2px] bg-zinc-100 border-separate text-secondary-foreground px-5 py-4 rounded-lg w-full text-nowrap overflow-x-auto h-fit flex-shrink-0;
 }
 
@@ -133,14 +133,27 @@ code {
   @apply bg-secondary text-secondary-foreground px-2 py-[2px] rounded-md overflow-x-auto whitespace-pre text-[1rem];
 }
 
-pre::-webkit-scrollbar {
-  @apply hidden;
-}
 
 pre code {
   @apply bg-zinc-100 dark:bg-zinc-900 text-secondary-foreground opacity-85 p-0 rounded-none overflow-x-auto whitespace-pre;
+} */
+
+code {
+  @apply bg-secondary rounded-[0.4rem] text-secondary-foreground py-[2px] px-2;
 }
 
+pre {
+  @apply dark:bg-zinc-900 border-[1.5px] rounded-lg text-secondary-foreground bg-zinc-100 py-4 px-5 overflow-x-auto whitespace-pre;
+
+  code {
+    @apply bg-transparent p-0 overflow-x-auto whitespace-pre;
+    color: inherit;
+  }
+}
+
+pre::-webkit-scrollbar {
+  @apply hidden;
+}
 .tiptap {
   @apply leading-relaxed;
 }
@@ -164,5 +177,9 @@ pre code {
 }
 
 main::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

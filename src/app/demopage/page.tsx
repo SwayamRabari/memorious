@@ -352,7 +352,7 @@ const DemoPage = () => {
             </div>
             {selectedNote ? (
               <div
-                className={`scrollarea overflow-auto flex-1 flex transition-transform duration-500 py-16 ${
+                className={`scrollarea overflow-auto flex-1 flex transition-transform duration-500 py-5 md:py-16 ${
                   isSidebarOpen ? 'opacity-30 sm:opacity-100' : 'opacity-100'
                 } justify-center`}
               >

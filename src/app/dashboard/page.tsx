@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useNoteStore } from '@/lib/stores/noteStore';
 import { Note } from '@/lib/types';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const { data: session, status } = useSession();
@@ -118,7 +119,13 @@ const Dashboard = () => {
   };
 
   const handleSaveChanges = async () => {
-    await saveNote(session?.user?.id);
+    const toastId = toast.loading('Saving changes...');
+    try {
+      await saveNote(session?.user?.id);
+      toast.dismiss(toastId);
+    } catch (error) {
+      toast.error('Failed to save changes.', { id: toastId });
+    }
     setIsAlertDialogOpen(false);
     if (nextNoteToSelect) {
       selectNote(nextNoteToSelect);

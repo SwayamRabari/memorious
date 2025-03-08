@@ -1,6 +1,6 @@
 # Memorious
 
-Memorious is a note-taking solution built on Next.js. It provides a clean space to capture ideas, harness modern AI features, and stay organized. Designed for efficiency and convenience, it makes managing your information seamless and straightforward.
+Memorious is a digital notebook built on Next.js. It provides a clean space to capture ideas, harness modern AI features, and stay organized. Designed for efficiency and convenience, it makes managing your information seamless and straightforward.
 
 ![Dark Mode Screenshot](public/memoriousdark.png)
 

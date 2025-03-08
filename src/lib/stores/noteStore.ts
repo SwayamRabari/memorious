@@ -132,7 +132,7 @@ export const useNoteStore = create<NoteState>()(
           const tempId = `temp-${Date.now()}`;
           const tempNote = { ...selectedNote, id: tempId };
           set((state) => ({
-            notes: [tempNote, ...state.notes],
+            notes: [...state.notes, tempNote],
             selectedNote: tempNote,
             hasUnsavedChanges: false,
           }));

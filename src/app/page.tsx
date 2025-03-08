@@ -19,15 +19,15 @@ export default async function Home() {
       <Navbar />
       <div className="container max-w-[1200px] h-fit flex flex-col items-center pt-40 py-10 md:py-20 md:pt-44">
         <div className="mb-5">
-          <div className="hero mb-3 md:mb-5 leading-tight text-[6.5vw] md:text-6xl font-extrabold w-full text-center">
-            <div className="mb-2 md:mb-3">
+          <div className="hero mb-3 md:mb-5 leading-normal lg:leading-[80px] text-[7vw] md:text-7xl font-black dark:font-extrabold w-full text-center tracking-normal">
+            <div className="mb-2 md:mb-5">
               All You Need to Write,
               <br /> Organized in One Place.
             </div>
-            <div className="desc text-[4vw] md:text-xl w-full px-[1vw] sm:px-[15%] font-semibold text-zinc-500">
-              A powerful note-taking app that helps you create, save, and refine
-              ideas with ease. Powered by Gemini, your intelligent assistant for
-              seamless writing.
+            <div className="desc text-[4vw] md:text-xl w-full px-[1vw] sm:px-[15%] font-semibold text-zinc-500 dark:text-zinc-400">
+              A powerful digital notebook app that helps you create, save, and
+              refine ideas with ease. Powered by Gemini, your intelligent
+              assistant for seamless writing.
             </div>
           </div>
         </div>
@@ -49,14 +49,14 @@ export default async function Home() {
           className="mb-20 rounded-md border-2 border-secondary dark:hidden"
           src={'/memoriouslight.png'}
           alt=""
-          width={1000}
-          height={500}
+          width={1200}
+          height={600}
         />
         <Image
           className="mb-20 md:mb-24 rounded-md border-2 border-secondary hidden dark:block"
           src={'/memoriousdark.png'}
           alt=""
-          width={1000}
+          width={1200}
           height={500}
         />
         <div className="gemini flex flex-col items-center justify-center">
