@@ -33,7 +33,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from '@/components/ui/alert-dialog';
-import { useNoteStore } from '@/lib/stores/noteStore';
+import { useNoteStore } from '@/store/noteStore';
 import { Note } from '@/lib/types';
 import { toast } from 'sonner';
 
@@ -65,6 +65,7 @@ const Dashboard = () => {
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [nextNoteToSelect, setNextNoteToSelect] = useState<any>(null);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -73,18 +74,13 @@ const Dashboard = () => {
     }
   }, [status, router]);
 
-  // Check if mobile device to disable edit mode
-  // useEffect(() => {
-  //   const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
-  //   if (isMobileDevice) {
-  //     toggleCanEdit();
-  //   }
-  // }, [toggleCanEdit]);
-
   // Fetch notes when authenticated
   useEffect(() => {
     if (status === 'authenticated') {
-      fetchNotes(session?.user?.id);
+      setIsLoadingNotes(true);
+      fetchNotes(session?.user?.id).finally(() => {
+        setIsLoadingNotes(false);
+      });
     }
   }, [status, fetchNotes, session?.user?.id]);
 
@@ -251,6 +247,21 @@ const Dashboard = () => {
     return null;
   }
 
+  // Create a skeleton UI component for notes
+  const NotesSkeleton = () => (
+    <div className="flex flex-col gap-1 w-full">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div
+          key={i}
+          className="h-10 w-full rounded-md animate-pulse bg-secondary/50 flex items-center px-3"
+        >
+          <div className="h-5 w-5 rounded-md bg-secondary/80 mr-2"></div>
+          <div className="h-4 w-3/4 bg-secondary/80 rounded"></div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <>
       <div className="flex flex-col h-screen w-screen transition-colors duration-150">
@@ -273,7 +284,7 @@ const Dashboard = () => {
             <Button
               variant={'secondary'}
               className="h-10 w-10"
-              onClick={() => saveNote(session?.user?.id)}
+              onClick={() => handleSaveChanges()}
               disabled={!hasUnsavedChanges}
             >
               <Save className="h-5 w-5 flex-shrink-0" />
@@ -336,34 +347,40 @@ const Dashboard = () => {
             {/* Notes list */}
             <ScrollArea className="flex-1 px-5">
               <div className="py-5">
-                <div className="flex flex-col gap-1 cursor-pointer">
-                  {filteredNotes
-                    .filter((note) => note && note.id)
-                    .map(
-                      (note, index) =>
-                        !note.id.startsWith('temp-') && (
-                          <div
-                            key={note.id || index}
-                            onClick={() => handleSelectNote(note)}
-                            className={`noteitem group relative h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
-                              selectedNote?.id === note.id ? 'bg-secondary' : ''
-                            }`}
-                          >
-                            <FileText className="h-5 w-5 mr-2 stroke-2 flex-shrink-0" />
-                            <div className="text-nowrap overflow-hidden">
-                              {note.title || 'Untitled'}
-                            </div>
+                {isLoadingNotes ? (
+                  <NotesSkeleton />
+                ) : (
+                  <div className="flex flex-col gap-1 cursor-pointer">
+                    {filteredNotes
+                      .filter((note) => note && note.id)
+                      .map(
+                        (note, index) =>
+                          !note.id.startsWith('temp-') && (
                             <div
-                              className={`shadowcover transition-all absolute bg-gradient-to-r ${
+                              key={note.id || index}
+                              onClick={() => handleSelectNote(note)}
+                              className={`noteitem group relative h-10 w-full rounded-md grid grid-flow-col items-center justify-start px-3 text-[1rem] font-semibold hover:bg-secondary overflow-hidden ${
                                 selectedNote?.id === note.id
-                                  ? 'from-transparent to-secondary'
-                                  : 'from-transparent to-background'
-                              } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
-                            ></div>
-                          </div>
-                        ),
-                    )}{' '}
-                </div>
+                                  ? 'bg-secondary'
+                                  : ''
+                              }`}
+                            >
+                              <FileText className="h-5 w-5 mr-2 stroke-2 flex-shrink-0" />
+                              <div className="text-nowrap overflow-hidden">
+                                {note.title || 'Untitled'}
+                              </div>
+                              <div
+                                className={`shadowcover transition-all absolute bg-gradient-to-r ${
+                                  selectedNote?.id === note.id
+                                    ? 'from-transparent to-secondary'
+                                    : 'from-transparent to-background'
+                                } w-10 h-full right-3 top-0 group-hover:from-transparent group-hover:to-secondary`}
+                              ></div>
+                            </div>
+                          ),
+                      )}{' '}
+                  </div>
+                )}
               </div>
             </ScrollArea>
 
@@ -420,7 +437,7 @@ const Dashboard = () => {
                 <Button
                   variant={'secondary'}
                   className="h-10 w-10"
-                  onClick={() => saveNote(session?.user?.id)}
+                  onClick={() => handleSaveChanges()}
                   disabled={!hasUnsavedChanges}
                 >
                   <Save className="h-5 w-5 flex-shrink-0" />

@@ -15,31 +15,20 @@ import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Text, List, ListTree } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface PreferenceProps {
-  responseLoading: boolean;
-  lengthValue: number[];
-  setLengthValue: (value: number[]) => void;
-  lengthLabel: string;
-  setLengthLabel: (label: string) => void;
-  structure: string;
-  setStructure: (structure: string) => void;
-  tone: string;
-  setTone: (tone: string) => void;
-}
-
-export default function Preference({
-  responseLoading,
-  lengthValue,
-  setLengthValue,
-  lengthLabel,
-  setLengthLabel,
-  structure,
-  setStructure,
-  tone,
-  setTone,
-}: PreferenceProps) {
+import { useEditorStore } from '@/store/editorStore';
+export default function Preference() {
   const [open, setOpen] = useState(false);
+  const {
+    responseLoading,
+    lengthValue,
+    setLengthValue,
+    lengthLabel,
+    setLengthLabel,
+    structure,
+    setStructure,
+    tone,
+    setTone,
+  } = useEditorStore();
 
   const structureLabels: { [key: string]: string } = {
     paragraphs: 'Paragraphs',
@@ -85,9 +74,11 @@ export default function Preference({
             value={lengthValue}
             onValueChange={(value) => {
               setLengthValue(value);
-              if (value[0] > 66) setLengthLabel('Long');
-              else if (value[0] > 33) setLengthLabel('Medium');
-              else setLengthLabel('Short');
+              if (value[0] <= 20) setLengthLabel('Very Short');
+              else if (value[0] <= 40) setLengthLabel('Short');
+              else if (value[0] <= 66) setLengthLabel('Medium');
+              else if (value[0] <= 90) setLengthLabel('Long');
+              else setLengthLabel('Very Long');
             }}
           />
         </div>
@@ -138,7 +129,7 @@ export default function Preference({
               htmlFor="paragraphs"
               className={cn(
                 'flex items-center justify-center rounded-md border border-muted bg-popover h-10',
-                structure === 'paragraphs' && 'bg-secondary'
+                structure === 'paragraphs' && 'bg-secondary',
               )}
             >
               <RadioGroupItem
@@ -152,7 +143,7 @@ export default function Preference({
               htmlFor="points"
               className={cn(
                 'flex items-center justify-center rounded-md border border-muted bg-popover h-10',
-                structure === 'points' && 'bg-secondary'
+                structure === 'points' && 'bg-secondary',
               )}
             >
               <RadioGroupItem value="points" id="points" className="sr-only" />
@@ -162,7 +153,7 @@ export default function Preference({
               htmlFor="normal"
               className={cn(
                 'flex items-center justify-center rounded-md border border-muted bg-popover h-10',
-                structure === 'normal' && 'bg-secondary'
+                structure === 'normal' && 'bg-secondary',
               )}
             >
               <RadioGroupItem value="normal" id="normal" className="sr-only" />

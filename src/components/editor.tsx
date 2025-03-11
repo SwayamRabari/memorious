@@ -10,8 +10,8 @@ import { Separator } from './ui/separator';
 import CodeBlock from './icons/codeblock';
 import { marked } from 'marked';
 import { toast } from 'sonner';
-import { useEditorStore } from '@/lib/stores/editorStore';
-import { useNoteStore } from '@/lib/stores/noteStore';
+import { useEditorStore } from '@/store/editorStore';
+import { useNoteStore } from '@/store/noteStore';
 import {
   Bold,
   Italic,
@@ -26,13 +26,12 @@ import {
   Undo,
   Redo,
   Forward,
-  Settings2,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import Star from './icons/star';
 import ListItem from '@tiptap/extension-list-item';
 import { BubbleMenu as BubbleMenuExtension } from '@tiptap/extension-bubble-menu';
-import { useState, useRef, useEffect, use } from 'react';
+import { useRef, useEffect } from 'react';
 import { Input } from './ui/input';
 import Preference from './preference';
 
@@ -83,6 +82,17 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
     toast.loading('Generating...', {
       id: 'generate',
     });
+
+    const finalPrompt =
+      `Write a note on: ` +
+      prompt +
+      `\nAdditional context:
+      \nDo not include main heading at top for the generated content.
+       \nLength of answer should be : ${lengthLabel}
+       \nStructure or answer should be : ${structure}
+       \nTone of answer should be : ${tone}`;
+
+    console.log(finalPrompt);
     try {
       const response = await fetch('/api/gemini', {
         method: 'POST',
@@ -90,9 +100,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt:
-            prompt +
-            '\n\nAdditional context: do not include main heading for the generated content. \n Make answer detailed and well structured.',
+          prompt: finalPrompt,
         }),
       });
 
@@ -229,17 +237,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
           onChange={(e) => setPrompt(e.target.value)}
           className="font-medium bg-transparent border-none focus:ring-0 h-fit transition-all duration-300 w-full"
         />
-        <Preference
-          responseLoading={responseLoading}
-          lengthValue={lengthValue}
-          setLengthValue={setLengthValue}
-          lengthLabel={lengthLabel}
-          setLengthLabel={setLengthLabel}
-          structure={structure}
-          setStructure={setStructure}
-          tone={tone}
-          setTone={setTone}
-        />
+        <Preference />
 
         <Button
           type="submit"
