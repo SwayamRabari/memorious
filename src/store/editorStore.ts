@@ -30,7 +30,7 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
   prompt: '',
   responseLoading: false,
   showPromptInput: false,
-  lengthValue: [50],
+  lengthValue: [850],
   lengthLabel: 'Medium',
   structure: 'normal',
   tone: 'normal',

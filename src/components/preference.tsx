@@ -37,7 +37,7 @@ export default function Preference() {
   };
 
   function handleReset() {
-    setLengthValue([50]);
+    setLengthValue([850]);
     setLengthLabel('Medium');
     setStructure('normal');
     setTone('normal');
@@ -70,14 +70,14 @@ export default function Preference() {
           <Slider
             id="length"
             min={1}
-            max={100}
+            max={1500}
             value={lengthValue}
             onValueChange={(value) => {
               setLengthValue(value);
-              if (value[0] <= 20) setLengthLabel('Very Short');
-              else if (value[0] <= 40) setLengthLabel('Short');
-              else if (value[0] <= 66) setLengthLabel('Medium');
-              else if (value[0] <= 90) setLengthLabel('Long');
+              if (value[0] <= 200) setLengthLabel('Very Short');
+              else if (value[0] <= 400) setLengthLabel('Short');
+              else if (value[0] <= 850) setLengthLabel('Medium');
+              else if (value[0] <= 1000) setLengthLabel('Long');
               else setLengthLabel('Very Long');
             }}
           />

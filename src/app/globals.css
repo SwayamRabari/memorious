@@ -82,7 +82,7 @@ main {
 }
 
 .tiptap {
-  @apply text-secondary-foreground w-full caret-foreground flex flex-col gap-4;
+  @apply text-secondary-foreground w-full caret-foreground flex flex-col gap-5;
 }
 
 .tiptap p.is-editor-empty:first-child::before {
@@ -143,7 +143,7 @@ code {
 }
 
 pre {
-  @apply dark:bg-zinc-900 border-[1.5px] rounded-lg text-secondary-foreground bg-zinc-100 py-4 px-5 overflow-x-auto whitespace-pre;
+  @apply dark:bg-zinc-900 border-[1.5px] rounded-lg text-secondary-foreground bg-zinc-100 py-4 px-5 overflow-x-auto whitespace-pre mb-3;
 
   code {
     @apply bg-transparent p-0 overflow-x-auto whitespace-pre;

@@ -83,14 +83,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
       id: 'generate',
     });
 
-    const finalPrompt =
-      `Write a note on: ` +
-      prompt +
-      `\nAdditional context:
-      \nDo not include main heading at top for the generated content.
-       \nLength of answer should be : ${lengthLabel}
-       \nStructure or answer should be : ${structure}
-       \nTone of answer should be : ${tone}`;
+    let finalPrompt = `Create a note on "${prompt}" with a ${structure} structure, ${lengthLabel} in length and a ${tone} tone. Do not include main heading at top! Make sure that notes is structured and detailed.`;
 
     console.log(finalPrompt);
     try {
