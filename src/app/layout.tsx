@@ -7,7 +7,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 export const metadata: Metadata = {
   title: 'Memorious',
   description:
-    'A powerful note-taking app that helps you create, save, and refine ideas with ease. Powered by Gemini, your intelligent assistant for seamless writing.',
+    'A powerful knowledge management app that helps you create, save, and refine ideas with ease. Powered by Gemini, your intelligent assistant for seamless writing.',
 };
 
 export default function RootLayout({

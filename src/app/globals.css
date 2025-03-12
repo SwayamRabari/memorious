@@ -139,7 +139,7 @@ pre code {
 } */
 
 code {
-  @apply bg-secondary rounded-[0.4rem] text-secondary-foreground py-[2px] px-2;
+  @apply bg-secondary text-[1rem] rounded-[0.4rem] text-secondary-foreground py-[2px] px-2;
 }
 
 pre {

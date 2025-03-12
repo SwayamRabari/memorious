@@ -264,7 +264,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="flex flex-col h-screen w-screen transition-colors duration-150">
+      <div className="flex flex-col h-svh w-screen transition-colors duration-150">
         {/* Mobile header */}
         <div className="header border-b border-border flex lg:hidden justify-between items-center w-full p-5">
           <div className="flex gap-5">
