@@ -9,7 +9,9 @@ export async function POST(request: NextRequest) {
     throw new Error('GEMINI_API_KEY is not defined');
   }
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash-lite-001',
+  });
 
   try {
     const result = await model.generateContent(prompt);
