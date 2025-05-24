@@ -402,15 +402,15 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-              <Button className="h-10 w-10 bg-background hover:bg-background text-foreground">
-                <LogOut
-                  className="h-5 w-5 flex-shrink-0"
-                  onClick={() =>
-                    signOut({
-                      callbackUrl: '/',
-                    })
-                  }
-                />
+              <Button
+                className="h-10 w-10 bg-background hover:bg-background text-foreground"
+                onClick={async () => {
+                  const toastId = toast.loading('Signing out...');
+                  await signOut({ callbackUrl: '/' });
+                  toast.dismiss(toastId);
+                }}
+              >
+                <LogOut className="h-5 w-5 flex-shrink-0" />
               </Button>
             </div>
           </div>

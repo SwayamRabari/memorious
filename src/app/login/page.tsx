@@ -51,10 +51,7 @@ export default function Login() {
         });
         console.error('Error processing request:', result.error);
       } else {
-        toast.success('Signed in successfully!', {
-          duration: 2000,
-          id: toastId,
-        });
+        toast.dismiss(toastId);
         router.push('/dashboard');
       }
     } catch (error) {
