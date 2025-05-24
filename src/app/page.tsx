@@ -48,16 +48,22 @@ export default async function Home() {
         <Image
           className="mb-20 rounded-md border-2 border-secondary dark:hidden"
           src={'/memoriouslight.png'}
-          alt=""
+          alt="Memorious app interface in light mode"
           width={1200}
           height={600}
+          priority={true}
+          fetchPriority="high"
+          sizes="(max-width: 768px) 100vw, 1200px"
         />
         <Image
           className="mb-20 md:mb-24 rounded-md border-2 border-secondary hidden dark:block"
           src={'/memoriousdark.png'}
-          alt=""
+          alt="Memorious app interface in dark mode"
           width={1200}
           height={500}
+          priority={true}
+          fetchPriority="high"
+          sizes="(max-width: 768px) 100vw, 1200px"
         />
         <div className="gemini flex flex-col items-center justify-center">
           <div className="title w-full text-center text-[6vw] md:text-4xl font-bold mb-5 md:mb-10">
@@ -66,9 +72,10 @@ export default async function Home() {
           <Image
             className="mb-5 md:mb-10 h-[20vw] md:h-full hiver:shadow-lg shadow-inherit"
             src={'/gemini.svg'}
-            alt=""
+            alt="Gemini AI integration illustration"
             width={200}
             height={200}
+            loading="lazy"
           />
           <div className="desc text-[4vw] md:text-lg font-semibold text text-center sm:px-[20%] mb-24 text-zinc-500">
             Experience effortless note-taking with Integrated Gemini. Simply
