@@ -299,7 +299,7 @@ const Tiptap = ({ content, editable, onContentChange }: TiptapProps) => {
       <div v-if={editor}>
         {editor && (
           <div
-            className={`w-full fixed lg:absolute bottom-0 left-0 flex flex-col justify-center items-center py-3 ${editable ? 'bg-background' : 'bg-transparent h-0 overflow-hidden'} z-40 overflow-hidden`}
+            className={`w-full fixed lg:absolute bottom-0 left-0 flex flex-col justify-center items-center pb-4 pt-12 ${editable ? 'bg-gradient-to-t from-background from-65% to-transparent' : 'bg-transparent h-0 overflow-hidden'} z-40 overflow-hidden`}
           >
             <div
               className={`bg-background w-fit max-w-[90%] ${
