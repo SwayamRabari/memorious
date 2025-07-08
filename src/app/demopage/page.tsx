@@ -47,12 +47,73 @@ const DemoPage = () => {
 
   const [canEdit, setCanEdit] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  // Notes are only saved in memory for this demo.
+  // Your changes will be lost if you refresh or close the page.
   const [notesArray, setNotesArray] = useState<Note[]>([
     {
       id: 'welcome-note',
-      title: 'Welcome to the App!',
-      content:
-        'This is a welcome note to introduce you to the app. Here you can create, edit, and manage your notes efficiently. Enjoy your experience!',
+      title: 'Hey there 👋🏼',
+      content: `<div class="welcome-container">
+  <h1>Welcome to Memorious!</h1>
+  
+  <p class="intro">Your digital notebook for capturing ideas, organizing thoughts, and enhancing your writing experience.</p>
+  
+  <h2>📝 Getting Started</h2>
+  <div class="feature-section">
+    <p>Memorious makes note-taking simple and powerful:</p>
+    <ul>
+      <li><strong>Create notes</strong> - Click the "New Note" button or use our sidebar navigation</li>
+      <li><strong>Rich formatting</strong> - Style your text with our intuitive editor toolbar</li>
+      <li><strong>Instant search</strong> - Find your notes quickly with our powerful search function</li>
+    </ul>
+  </div>
+
+  <h2>🎨 Customize Your Experience</h2>
+  <div class="feature-section">
+    <p>Make Memorious work for you:</p>
+    <ul>
+      <li><strong>Dark/Light mode</strong> - Toggle between themes using the mode switch in the toolbar</li>
+      <li><strong>Focus mode</strong> - Hide the sidebar for distraction-free writing</li>
+      <li><strong>Lock editing</strong> - Use the lock icon to prevent accidental changes to important notes</li>
+      <li><strong>Responsive layout</strong> - Enjoy a seamless experience on any device</li>
+    </ul>
+  </div>
+
+  <h2>🤖 AI-Powered Writing</h2>
+  <div class="feature-section">
+    <p>Enhance your writing with our AI assistant:</p>
+    <ul>
+      <li><strong>Content generation</strong> - Get help drafting content for your notes</li>
+      <li><strong>Creative ideas</strong> - Overcome writer's block with AI-generated content</li>
+      <li><strong>Format results</strong> - Decide how the response should be</li>
+    </ul>
+  </div>
+
+  <h2>💡 Try These Prompts</h2>
+  <div class="example-container">
+    <div class="example">
+      <h3>✏️ Draft Content</h3>
+      <p class="prompt">"Write a product description for my new eco-friendly water bottle"</p>
+      <p class="result">Get a professionally written first draft to jumpstart your work.</p>
+    </div>
+    
+    <div class="example">
+      <h3>🔄 Rewrite & Polish</h3>
+      <p class="prompt">"Rewrite this paragraph to sound more professional"</p>
+      <p class="result">Instantly improve the tone and clarity of your writing.</p>
+    </div>
+    
+    <div class="example">
+      <h3>📋 Generate Structure</h3>
+      <p class="prompt">"Create an outline for a presentation about renewable energy"</p>
+      <p class="result">Quickly organize your thoughts with AI-generated frameworks.</p>
+    </div>
+  </div>
+
+  <h2>📁 Organize Your Way</h2>
+  <p>Create as many notes as you need and find them quickly with our powerful search feature. Perfect for projects, ideas, meeting notes, and more!</p>
+  <p>Note: This is demo mode so changes will not be saved for future sessions.</p>
+</div>`,
     },
   ]);
   const [selectedNoteContent, setSelectedNoteContent] = useState('');
